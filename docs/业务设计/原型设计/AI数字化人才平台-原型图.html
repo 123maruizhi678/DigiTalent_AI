@@ -1,0 +1,1832 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AI 数字化人才平台 · 产品原型</title>
+<style>
+  :root{
+    --bg:#f4f6fb;
+    --panel:#ffffff;
+    --ink:#0f172a;
+    --ink2:#475569;
+    --ink3:#94a3b8;
+    --line:#e7ebf3;
+    --brand:#2563eb;
+    --brand2:#4f46e5;
+    --cyan:#06b6d4;
+    --ok:#10b981;
+    --warn:#f59e0b;
+    --danger:#ef4444;
+    --violet:#8b5cf6;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:"PingFang SC","Microsoft YaHei","Helvetica Neue",Arial,sans-serif;
+    background:var(--bg);color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+    font-size:14px;
+  }
+  svg{display:block}
+
+  /* ---------- Layout ---------- */
+  .app{display:flex;height:100vh;overflow:hidden}
+
+  /* ---------- Sidebar ---------- */
+  .sidebar{
+    width:242px;flex:0 0 242px;
+    background:linear-gradient(180deg,#0b1220 0%,#101a30 60%,#0b1220 100%);
+    color:#cbd5e1;display:flex;flex-direction:column;
+    border-right:1px solid #16233c;
+  }
+  .brand{display:flex;align-items:center;gap:11px;padding:18px 18px 16px}
+  .brand-logo{
+    width:36px;height:36px;border-radius:11px;flex:0 0 36px;
+    background:linear-gradient(135deg,#3b82f6,#8b5cf6);
+    display:grid;place-items:center;font-weight:800;font-size:14px;color:#fff;
+    box-shadow:0 6px 16px rgba(59,130,246,.42);
+  }
+  .brand-name{font-size:15px;font-weight:700;color:#f1f5f9;letter-spacing:.3px}
+  .brand-sub{font-size:11px;color:#64748b;margin-top:2px}
+
+  .nav{flex:1;overflow-y:auto;padding:6px 10px 16px}
+  .nav::-webkit-scrollbar{width:5px}
+  .nav::-webkit-scrollbar-thumb{background:#1e293b;border-radius:3px}
+  .nav-group{
+    font-size:11px;color:#475569;padding:14px 10px 7px;letter-spacing:1.2px;font-weight:600;
+  }
+  .nav-item{
+    display:flex;align-items:center;gap:10px;
+    padding:9px 11px;border-radius:9px;cursor:pointer;
+    font-size:13.5px;color:#94a3b8;margin-bottom:2px;
+    transition:all .18s ease;user-select:none;
+  }
+  .nav-item svg{width:17px;height:17px;flex:0 0 17px;opacity:.85}
+  .nav-item:hover{background:#16233c;color:#e2e8f0}
+  .nav-item.active{
+    background:linear-gradient(90deg,rgba(37,99,235,.28),rgba(139,92,246,.18));
+    color:#fff;font-weight:600;
+    box-shadow:inset 0 0 0 1px rgba(96,165,250,.22);
+  }
+  .nav-item.active svg{opacity:1;color:#60a5fa}
+  .nav-badge{
+    margin-left:auto;background:#ef4444;color:#fff;font-size:10px;
+    padding:1px 6px;border-radius:8px;font-weight:700;
+  }
+
+  .sidebar-foot{padding:12px;border-top:1px solid #16233c}
+  .user-chip{display:flex;align-items:center;gap:10px;padding:8px;border-radius:10px;background:#101a30}
+  .avatar{
+    width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#0ea5e9,#6366f1);
+    display:grid;place-items:center;color:#fff;font-size:13px;font-weight:700;flex:0 0 32px;
+  }
+  .u-name{font-size:13px;color:#e2e8f0;font-weight:600}
+  .u-role{font-size:11px;color:#64748b;margin-top:1px}
+
+  /* ---------- Main ---------- */
+  .main{flex:1;display:flex;flex-direction:column;min-width:0}
+  .topbar{
+    height:60px;flex:0 0 60px;background:#fff;border-bottom:1px solid var(--line);
+    display:flex;align-items:center;justify-content:space-between;padding:0 22px;
+  }
+  .crumb{font-size:13px;color:var(--ink3)}
+  .crumb b{color:var(--ink);font-weight:600}
+  .top-actions{display:flex;align-items:center;gap:12px}
+  .search{
+    display:flex;align-items:center;gap:8px;background:var(--bg);
+    border:1px solid var(--line);border-radius:10px;padding:0 12px;height:36px;width:290px;
+  }
+  .search svg{width:15px;height:15px;color:var(--ink3)}
+  .search input{border:none;background:transparent;outline:none;font-size:13px;width:100%;color:var(--ink)}
+  .search input::placeholder{color:#a8b3c7}
+  .icon-btn{
+    width:36px;height:36px;border-radius:10px;border:1px solid var(--line);background:#fff;
+    display:grid;place-items:center;cursor:pointer;position:relative;color:var(--ink2);
+  }
+  .icon-btn svg{width:17px;height:17px}
+  .icon-btn:hover{background:var(--bg)}
+  .badge-dot{position:absolute;top:7px;right:8px;width:7px;height:7px;border-radius:50%;background:#ef4444;border:2px solid #fff}
+
+  .content{flex:1;overflow-y:auto;padding:22px 26px 40px}
+  .content::-webkit-scrollbar{width:8px}
+  .content::-webkit-scrollbar-thumb{background:#d5dce9;border-radius:4px}
+
+  /* ---------- Page ---------- */
+  .page{display:none;animation:fade .28s ease}
+  .page.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  .page-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:18px;gap:16px;flex-wrap:wrap}
+  .page-head h1{font-size:20px;font-weight:700;letter-spacing:.2px}
+  .page-head p{font-size:12.5px;color:var(--ink3);margin-top:5px}
+  .head-actions{display:flex;gap:10px}
+
+  .btn{
+    height:36px;padding:0 15px;border-radius:10px;border:1px solid var(--line);
+    background:#fff;font-size:13px;cursor:pointer;font-family:inherit;color:var(--ink2);
+    display:inline-flex;align-items:center;gap:6px;transition:.16s;font-weight:500;
+  }
+  .btn:hover{background:var(--bg)}
+  .btn.primary{
+    background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;border:none;
+    box-shadow:0 5px 14px rgba(37,99,235,.28);
+  }
+  .btn.primary:hover{filter:brightness(1.07)}
+  .btn.sm{height:29px;padding:0 11px;font-size:12px;border-radius:8px}
+
+  /* ---------- Cards ---------- */
+  .card{
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:18px;box-shadow:0 1px 2px rgba(16,24,40,.03);
+  }
+  .card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:15px;gap:10px}
+  .card-head h3{font-size:14.5px;font-weight:700}
+  .card-head .sub{font-size:12px;color:var(--ink3);font-weight:400;margin-left:6px}
+
+  .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:14px}
+  .stat{padding:16px 18px}
+  .stat-label{font-size:12.5px;color:var(--ink2);display:flex;align-items:center;gap:7px}
+  .dot{width:7px;height:7px;border-radius:50%;display:inline-block}
+  .dot.blue{background:#2563eb}.dot.cyan{background:#06b6d4}
+  .dot.amber{background:#f59e0b}.dot.violet{background:#8b5cf6}
+  .dot.green{background:#10b981}.dot.red{background:#ef4444}
+  .stat-num{font-size:27px;font-weight:750;margin:11px 0 5px;letter-spacing:-.5px}
+  .stat-num .unit{font-size:12px;font-weight:500;color:var(--ink3);margin-left:5px}
+  .stat-foot{font-size:11.5px;color:var(--ink3)}
+  .stat-foot.up{color:var(--ok)}
+  .stat-foot.warn{color:var(--warn)}
+
+  .grid-2{display:grid;grid-template-columns:1.45fr 1fr;gap:14px;margin-bottom:14px}
+  .grid-2.even{grid-template-columns:1fr 1fr}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px}
+  .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:14px}
+
+  /* ---------- Tags ---------- */
+  .tag{
+    display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;
+    padding:3px 9px;border-radius:20px;background:#eef2f9;color:var(--ink2);white-space:nowrap;
+  }
+  .tag.ok{background:#e7f8f1;color:#0d8a60}
+  .tag.warn{background:#fef4e4;color:#b8730a}
+  .tag.danger{background:#fdecec;color:#c53030}
+  .tag.blue{background:#e8f0fe;color:#1d4ed8}
+  .tag.violet{background:#f2ecfe;color:#6d28d9}
+  .tag.cyan{background:#e3f8fc;color:#0e7490}
+  .tag.gray{background:#f1f5f9;color:#64748b}
+
+  /* ---------- Progress ---------- */
+  .progress{height:6px;border-radius:4px;background:#eef2f8;overflow:hidden}
+  .progress > i{display:block;height:100%;border-radius:4px;background:linear-gradient(90deg,#3b82f6,#6366f1)}
+  .progress.green > i{background:linear-gradient(90deg,#10b981,#34d399)}
+  .progress.amber > i{background:linear-gradient(90deg,#f59e0b,#fbbf24)}
+  .progress.red > i{background:linear-gradient(90deg,#ef4444,#f87171)}
+
+  /* ---------- List rows ---------- */
+  .row{
+    display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px dashed var(--line);
+  }
+  .row:last-child{border-bottom:none}
+  .row .grow{flex:1;min-width:0}
+  .row .t1{font-size:13px;font-weight:600;margin-bottom:3px}
+  .row .t2{font-size:11.5px;color:var(--ink3)}
+
+  .agent-row{display:flex;align-items:center;gap:13px;padding:11px 0;border-bottom:1px dashed var(--line)}
+  .agent-row:last-child{border-bottom:none}
+  .agent-ico{
+    width:34px;height:34px;border-radius:10px;display:grid;place-items:center;flex:0 0 34px;
+    background:#eef3fe;color:var(--brand);font-size:11px;font-weight:700;
+  }
+  .agent-ico.v{background:#f2ecfe;color:#7c3aed}
+  .agent-ico.c{background:#e3f8fc;color:#0891b2}
+  .agent-ico.a{background:#fef4e4;color:#d97706}
+  .agent-ico.g{background:#e7f8f1;color:#059669}
+
+  /* ---------- Table ---------- */
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  thead th{
+    text-align:left;font-size:11.5px;color:var(--ink3);font-weight:600;
+    padding:9px 12px;background:#f8fafc;border-bottom:1px solid var(--line);
+    letter-spacing:.3px;white-space:nowrap;
+  }
+  thead th:first-child{border-radius:9px 0 0 0}
+  thead th:last-child{border-radius:0 9px 0 0}
+  tbody td{padding:12px;border-bottom:1px solid #f1f5f9;vertical-align:middle}
+  tbody tr:hover{background:#fafcff}
+  tbody tr:last-child td{border-bottom:none}
+  .cell-name{font-weight:600;font-size:13px}
+  .cell-sub{font-size:11.5px;color:var(--ink3);margin-top:2px}
+
+  /* ---------- Ring ---------- */
+  .ring{
+    width:52px;height:52px;border-radius:50%;flex:0 0 52px;
+    background:conic-gradient(var(--rc,#10b981) calc(var(--v) * 1%), #e9eef7 0);
+    display:grid;place-items:center;
+  }
+  .ring > span{
+    width:40px;height:40px;border-radius:50%;background:#fff;
+    display:grid;place-items:center;font-size:12.5px;font-weight:750;color:var(--ink);
+  }
+
+  /* ---------- Chips ---------- */
+  .chips{display:flex;flex-wrap:wrap;gap:7px}
+  .chip{
+    font-size:11.5px;padding:4px 11px;border-radius:20px;background:#f1f5f9;
+    color:var(--ink2);cursor:pointer;border:1px solid transparent;transition:.15s;
+  }
+  .chip:hover{background:#e8eef8}
+  .chip.on{background:#e8f0fe;color:#1d4ed8;border-color:#c7d9fb;font-weight:600}
+
+  /* ---------- Chat ---------- */
+  .chat{display:flex;flex-direction:column;gap:16px}
+  .msg{display:flex;gap:11px;max-width:100%}
+  .msg.user{flex-direction:row-reverse}
+  .msg-av{
+    width:32px;height:32px;border-radius:10px;flex:0 0 32px;display:grid;place-items:center;
+    font-size:12px;font-weight:700;color:#fff;background:linear-gradient(135deg,#0ea5e9,#6366f1);
+  }
+  .msg.user .msg-av{background:linear-gradient(135deg,#94a3b8,#64748b)}
+  .bubble{
+    background:#f7f9fd;border:1px solid var(--line);border-radius:12px;
+    padding:13px 15px;font-size:13px;line-height:1.7;color:var(--ink2);max-width:calc(100% - 60px);
+  }
+  .msg.user .bubble{background:linear-gradient(135deg,#2563eb,#4f46e5);color:#fff;border:none}
+  .bubble b{color:var(--ink)}
+  .msg.user .bubble b{color:#fff}
+  .cite{
+    display:flex;align-items:center;gap:8px;margin-top:10px;padding:9px 11px;
+    background:#fff;border:1px solid var(--line);border-radius:9px;font-size:11.5px;color:var(--ink2);
+  }
+  .cite .n{
+    width:18px;height:18px;border-radius:5px;background:#e8f0fe;color:#1d4ed8;
+    display:grid;place-items:center;font-size:10px;font-weight:700;flex:0 0 18px;
+  }
+  .ask-bar{
+    display:flex;gap:10px;align-items:center;background:#fff;border:1px solid var(--line);
+    border-radius:12px;padding:8px 8px 8px 15px;box-shadow:0 2px 10px rgba(16,24,40,.04);
+  }
+  .ask-bar input{flex:1;border:none;outline:none;font-size:13.5px;font-family:inherit;color:var(--ink)}
+  .ask-bar input::placeholder{color:#a8b3c7}
+
+  /* ---------- Bars ---------- */
+  .bars{display:flex;align-items:flex-end;gap:16px;height:150px;padding:6px 4px 0}
+  .bar-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;height:100%}
+  .bar-wrap{flex:1;width:100%;display:flex;align-items:flex-end;justify-content:center}
+  .bar{
+    width:100%;max-width:38px;border-radius:7px 7px 3px 3px;
+    background:linear-gradient(180deg,#60a5fa,#3b82f6);transition:.3s;
+  }
+  .bar.v{background:linear-gradient(180deg,#a78bfa,#8b5cf6)}
+  .bar.c{background:linear-gradient(180deg,#67e8f9,#06b6d4)}
+  .bar-item span{font-size:11px;color:var(--ink3)}
+
+  /* ---------- Radar ---------- */
+  .radar-wrap{display:flex;align-items:center;justify-content:center;padding:4px 0}
+
+  /* ---------- Flow canvas ---------- */
+  .canvas{
+    position:relative;width:100%;padding-top:40%;
+    background:
+      linear-gradient(#f1f5fb 1px,transparent 1px) 0 0/22px 22px,
+      linear-gradient(90deg,#f1f5fb 1px,transparent 1px) 0 0/22px 22px,
+      #fbfcfe;
+    border:1px solid var(--line);border-radius:12px;overflow:hidden;
+  }
+  .flow-lines{position:absolute;inset:0;width:100%;height:100%}
+  .node{
+    position:absolute;width:15%;height:15%;border-radius:11px;background:#fff;
+    border:1px solid #dbe4f3;box-shadow:0 3px 10px rgba(16,24,40,.07);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+    font-size:11px;font-weight:600;color:var(--ink2);text-align:center;padding:4px;
+  }
+  .node em{font-style:normal;font-size:9.5px;color:var(--ink3);font-weight:500}
+  .node.hl{border-color:#93c5fd;background:linear-gradient(180deg,#f0f7ff,#e6f0ff);color:#1d4ed8}
+  .node.hl em{color:#3b82f6}
+  .node.pk{border-color:#c4b5fd;background:linear-gradient(180deg,#f8f5ff,#f1ebff);color:#6d28d9}
+  .node.pk em{color:#8b5cf6}
+
+  /* ---------- Tabs ---------- */
+  .tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:16px}
+  .tab{
+    padding:9px 15px;font-size:13px;color:var(--ink3);cursor:pointer;
+    border-bottom:2px solid transparent;margin-bottom:-1px;font-weight:500;transition:.15s;
+  }
+  .tab:hover{color:var(--ink2)}
+  .tab.on{color:var(--brand);border-bottom-color:var(--brand);font-weight:600}
+  .tab-panel{display:none}
+  .tab-panel.on{display:block;animation:fade .25s ease}
+
+  /* ---------- Misc ---------- */
+  .kpi-line{display:flex;align-items:center;justify-content:space-between;font-size:12.5px;padding:9px 0;border-bottom:1px dashed var(--line)}
+  .kpi-line:last-child{border-bottom:none}
+  .kpi-line .k{color:var(--ink2)}
+  .kpi-line .v{font-weight:700}
+  .gauge-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  .gauge{padding:13px;border:1px solid var(--line);border-radius:11px;background:#fbfcfe}
+  .gauge .gl{font-size:11.5px;color:var(--ink3);margin-bottom:9px}
+  .gauge .gv{font-size:19px;font-weight:750;margin-bottom:9px}
+  .gauge .gv small{font-size:11px;color:var(--ink3);font-weight:500;margin-left:3px}
+
+  .empty-note{font-size:11.5px;color:var(--ink3);margin-top:12px;line-height:1.6}
+
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:var(--ink2);margin-top:10px}
+  .legend i{width:8px;height:8px;border-radius:2px;display:inline-block;margin-right:5px}
+
+  @media (max-width:1220px){
+    .stat-grid{grid-template-columns:repeat(2,1fr)}
+    .grid-3{grid-template-columns:1fr 1fr}
+    .grid-4{grid-template-columns:1fr 1fr}
+  }
+  @media (max-width:980px){
+    .grid-2,.grid-2.even,.grid-3{grid-template-columns:1fr}
+    .sidebar{width:70px;flex:0 0 70px}
+    .brand-name,.brand-sub,.nav-group,.nav-item span,.sidebar-foot .u-name,.sidebar-foot .u-role{display:none}
+    .nav-item{justify-content:center;padding:10px}
+    .nav-badge{position:absolute;top:4px;right:6px;margin:0}
+    .nav-item{position:relative}
+    .search{width:150px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-logo">AI</div>
+      <div>
+        <div class="brand-name">AI 数字化人才平台</div>
+        <div class="brand-sub">AI 原生 · 企业级</div>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <div class="nav-group">概 览</div>
+      <div class="nav-item active" data-page="dashboard" data-title="智能工作台">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.6"/><rect x="14" y="3" width="7" height="7" rx="1.6"/><rect x="3" y="14" width="7" height="7" rx="1.6"/><rect x="14" y="14" width="7" height="7" rx="1.6"/></svg>
+        <span>智能工作台</span>
+      </div>
+
+      <div class="nav-group">AI 人才档案</div>
+      <div class="nav-item" data-page="resume" data-title="简历智能筛选">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></svg>
+        <span>简历智能筛选</span>
+        <i class="nav-badge" style="font-style:normal">12</i>
+      </div>
+      <div class="nav-item" data-page="talent" data-title="人才画像档案">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0"/></svg>
+        <span>人才画像档案</span>
+      </div>
+
+      <div class="nav-group">招聘与匹配</div>
+      <div class="nav-item" data-page="match" data-title="岗位-人才匹配">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.6"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3"/></svg>
+        <span>岗位-人才匹配</span>
+      </div>
+      <div class="nav-item" data-page="exam" data-title="智能测评">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2.4"/><path d="M8.5 12.5l2.2 2.2 4.6-4.8"/></svg>
+        <span>智能测评</span>
+      </div>
+
+      <div class="nav-group">培训成长</div>
+      <div class="nav-item" data-page="training" data-title="个性化培训">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5V5.5"/></svg>
+        <span>个性化培训</span>
+      </div>
+
+      <div class="nav-group">数据与知识</div>
+      <div class="nav-item" data-page="data" data-title="智能问数">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
+        <span>智能问数</span>
+        <i class="nav-badge" style="font-style:normal;background:#8b5cf6">AI</i>
+      </div>
+      <div class="nav-item" data-page="kb" data-title="领域知识库">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="8" ry="3.2"/><path d="M4 6v12c0 1.8 3.6 3.2 8 3.2s8-1.4 8-3.2V6"/><path d="M4 12c0 1.8 3.6 3.2 8 3.2s8-1.4 8-3.2"/></svg>
+        <span>领域知识库</span>
+      </div>
+
+      <div class="nav-group">多智能体</div>
+      <div class="nav-item" data-page="agent" data-title="Agent 编排中心">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 4v4M9 14h.01M15 14h.01"/><path d="M2 13v3M22 13v3"/></svg>
+        <span>Agent 编排中心</span>
+      </div>
+
+      <div class="nav-group">系 统</div>
+      <div class="nav-item" data-page="system" data-title="系统管理">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.05A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.05A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6h.05A1.7 1.7 0 0 0 10 3.05V3a2 2 0 1 1 4 0v.05A1.7 1.7 0 0 0 15 4.6a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9v.05a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.05a1.7 1.7 0 0 0-1.55 1z"/></svg>
+        <span>系统管理</span>
+      </div>
+      <div class="nav-item" data-page="stack" data-title="技术架构现状">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/></svg>
+        <span>技术架构现状</span>
+      </div>
+    </nav>
+
+    <div class="sidebar-foot">
+      <div class="user-chip">
+        <div class="avatar">管</div>
+        <div>
+          <div class="u-name">系统管理员</div>
+          <div class="u-role">超级管理员 · 全部权限</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ MAIN ============ -->
+  <div class="main">
+    <header class="topbar">
+      <div class="crumb">AI 数字化人才平台 / <b id="crumbPage">智能工作台</b></div>
+      <div class="top-actions">
+        <div class="search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.2-3.2"/></svg>
+          <input placeholder="搜索人才 / 岗位 / 知识库…" />
+        </div>
+        <div class="icon-btn" title="通知">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+          <span class="badge-dot"></span>
+        </div>
+        <div class="icon-btn" title="模型供应商">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>
+        </div>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- ================= PAGE: DASHBOARD ================= -->
+      <section class="page active" id="page-dashboard">
+        <div class="page-head">
+          <div>
+            <h1>智能工作台</h1>
+            <p>AI 原生人才智能平台 · 全流程智能化运营概览（数据截至 2026-09-27）</p>
+          </div>
+          <div class="head-actions">
+            <button class="btn">导出日报</button>
+            <button class="btn primary">+ 发起 AI 任务</button>
+          </div>
+        </div>
+
+        <div class="stat-grid">
+          <div class="card stat">
+            <div class="stat-label"><i class="dot blue"></i>在库人才档案</div>
+            <div class="stat-num">12,486<span class="unit">人</span></div>
+            <div class="stat-foot up">↑ 8.2% 环比上月</div>
+          </div>
+          <div class="card stat">
+            <div class="stat-label"><i class="dot cyan"></i>本月解析简历</div>
+            <div class="stat-num">3,254<span class="unit">份</span></div>
+            <div class="stat-foot up">解析成功率 99.2%</div>
+          </div>
+          <div class="card stat">
+            <div class="stat-label"><i class="dot amber"></i>待处理匹配任务</div>
+            <div class="stat-num">86<span class="unit">项</span></div>
+            <div class="stat-foot warn">12 项已超时预警</div>
+          </div>
+          <div class="card stat">
+            <div class="stat-label"><i class="dot violet"></i>AI 调用量（本月）</div>
+            <div class="stat-num">128.6<span class="unit">万次</span></div>
+            <div class="stat-foot">覆盖 5 大 Agent · 平均 412ms</div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-head">
+              <h3>五大智能体运行状态<span class="sub">LangGraph 有状态工作流</span></h3>
+              <span class="tag ok">● 全部在线</span>
+            </div>
+
+            <div class="agent-row">
+              <div class="agent-ico">档案</div>
+              <div class="grow" style="flex:1">
+                <div style="display:flex;justify-content:space-between;margin-bottom:7px">
+                  <span style="font-size:13px;font-weight:600">档案解析 Agent</span>
+                  <span style="font-size:11.5px;color:var(--ink3)">今日处理 428 份</span>
+                </div>
+                <div class="progress green"><i style="width:92%"></i></div>
+              </div>
+            </div>
+
+            <div class="agent-row">
+              <div class="agent-ico v">测评</div>
+              <div class="grow" style="flex:1">
+                <div style="display:flex;justify-content:space-between;margin-bottom:7px">
+                  <span style="font-size:13px;font-weight:600">测评分析 Agent</span>
+                  <span style="font-size:11.5px;color:var(--ink3)">千人千卷 · 生成 156 套</span>
+                </div>
+                <div class="progress"><i style="width:78%"></i></div>
+              </div>
+            </div>
+
+            <div class="agent-row">
+              <div class="agent-ico c">匹配</div>
+              <div class="grow" style="flex:1">
+                <div style="display:flex;justify-content:space-between;margin-bottom:7px">
+                  <span style="font-size:13px;font-weight:600">岗位匹配 Agent</span>
+                  <span style="font-size:11.5px;color:var(--ink3)">平均匹配分 87.4</span>
+                </div>
+                <div class="progress"><i style="width:87%"></i></div>
+              </div>
+            </div>
+
+            <div class="agent-row">
+              <div class="agent-ico a">培训</div>
+              <div class="grow" style="flex:1">
+                <div style="display:flex;justify-content:space-between;margin-bottom:7px">
+                  <span style="font-size:13px;font-weight:600">培训赋能 Agent</span>
+                  <span style="font-size:11.5px;color:var(--ink3)">在学 1,204 人</span>
+                </div>
+                <div class="progress amber"><i style="width:64%"></i></div>
+              </div>
+            </div>
+
+            <div class="agent-row">
+              <div class="agent-ico g">决策</div>
+              <div class="grow" style="flex:1">
+                <div style="display:flex;justify-content:space-between;margin-bottom:7px">
+                  <span style="font-size:13px;font-weight:600">数据决策 Agent</span>
+                  <span style="font-size:11.5px;color:var(--ink3)">NL2SQL 引擎</span>
+                </div>
+                <div class="progress green"><i style="width:71%"></i></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <h3>人才缺口预警</h3>
+              <span class="tag warn">3 条待处理</span>
+            </div>
+
+            <div class="row">
+              <div class="ring" style="--v:34;--rc:#ef4444"><span>34%</span></div>
+              <div class="grow">
+                <div class="t1">高级算法工程师</div>
+                <div class="t2">需求 26 人 · 在库匹配 9 人 · 缺口 17 人</div>
+              </div>
+              <span class="tag danger">严重</span>
+            </div>
+
+            <div class="row">
+              <div class="ring" style="--v:61;--rc:#f59e0b"><span>61%</span></div>
+              <div class="grow">
+                <div class="t1">数据分析师（P6）</div>
+                <div class="t2">需求 18 人 · 在库匹配 11 人 · 缺口 7 人</div>
+              </div>
+              <span class="tag warn">预警</span>
+            </div>
+
+            <div class="row">
+              <div class="ring" style="--v:76;--rc:#10b981"><span>76%</span></div>
+              <div class="grow">
+                <div class="t1">产品经理（AI 方向）</div>
+                <div class="t2">需求 12 人 · 在库匹配 9 人 · 缺口 3 人</div>
+              </div>
+              <span class="tag ok">可控</span>
+            </div>
+
+            <div class="empty-note">※ 系统已自动向储备人才池推送 24 条岗位邀约，等待 HR 确认。</div>
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <div class="card">
+            <div class="card-head"><h3>简历解析吞吐</h3><span class="tag gray">近 7 日</span></div>
+            <div class="bars">
+              <div class="bar-item"><div class="bar-wrap"><div class="bar" style="height:52%"></div></div><span>21</span></div>
+              <div class="bar-item"><div class="bar-wrap"><div class="bar" style="height:68%"></div></div><span>22</span></div>
+              <div class="bar-item"><div class="bar-wrap"><div class="bar" style="height:44%"></div></div><span>23</span></div>
+              <div class="bar-item"><div class="bar-wrap"><div class="bar" style="height:81%"></div></div><span>24</span></div>
+              <div class="bar-item"><div class="bar-wrap"><div class="bar" style="height:73%"></div></div><span>25</span></div>
+              <div class="bar-item"><div class="bar-wrap"><div class="bar" style="height:95%"></div></div><span>26</span></div>
+              <div class="bar-item"><div class="bar-wrap"><div class="bar" style="height:62%"></div></div><span>27</span></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h3>RAG 知识库问答量</h3><span class="tag gray">按角色</span></div>
+            <div class="kpi-line"><span class="k">普通员工</span><span class="v">4,812 次</span></div>
+            <div class="kpi-line"><span class="k">HR / 招聘</span><span class="v">2,306 次</span></div>
+            <div class="kpi-line"><span class="k">业务负责人</span><span class="v">1,184 次</span></div>
+            <div class="kpi-line"><span class="k">管理层</span><span class="v">642 次</span></div>
+            <div class="kpi-line"><span class="k">回答溯源命中率</span><span class="v" style="color:var(--ok)">96.7%</span></div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h3>系统健康度</h3><span class="tag ok">正常</span></div>
+            <div class="kpi-line"><span class="k">接口平均响应</span><span class="v">328 ms</span></div>
+            <div class="kpi-line"><span class="k">向量检索时延</span><span class="v">186 ms</span></div>
+            <div class="kpi-line"><span class="k">缓存命中率</span><span class="v" style="color:var(--warn)">82%（目标 98%）</span></div>
+            <div class="kpi-line"><span class="k">Celery 队列积压</span><span class="v">14 个任务</span></div>
+            <div class="kpi-line"><span class="k">在线并发</span><span class="v">642 / 2000</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= PAGE: RESUME ================= -->
+      <section class="page" id="page-resume">
+        <div class="page-head">
+          <div>
+            <h1>简历智能筛选</h1>
+            <p>全格式解析（PDF / Word / 图片 / 扫描件）· 向量级标签画像 · 语义化检索 · 智能查重合并</p>
+          </div>
+          <div class="head-actions">
+            <button class="btn">批量导入</button>
+            <button class="btn primary">+ 上传简历</button>
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <div class="card">
+            <div class="gauge">
+              <div class="gl">解析准确率（目标 ≥99%）</div>
+              <div class="gv">99.2<small>%</small></div>
+              <div class="progress green"><i style="width:99%"></i></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="gauge">
+              <div class="gl">今日待解析队列</div>
+              <div class="gv">128<small>份</small></div>
+              <div class="progress amber"><i style="width:46%"></i></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="gauge">
+              <div class="gl">重复简历合并命中</div>
+              <div class="gv">37<small>组</small></div>
+              <div class="progress"><i style="width:62%"></i></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-head"><h3>筛选条件</h3><button class="btn sm">重置</button></div>
+          <div class="chips" style="margin-bottom:12px">
+            <span class="chip on">全部岗位</span>
+            <span class="chip">高级算法工程师</span>
+            <span class="chip">数据分析师 P6</span>
+            <span class="chip">AI 产品经理</span>
+            <span class="chip">后端开发</span>
+          </div>
+          <div class="chips">
+            <span class="chip on">匹配分 ≥ 80</span>
+            <span class="chip on">已解析</span>
+            <span class="chip">待人工复核</span>
+            <span class="chip">985 / 211</span>
+            <span class="chip">3 年以上经验</span>
+            <span class="chip">已查重</span>
+          </div>
+        </div>
+
+        <div class="card" style="padding:0;overflow:hidden">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:30px"><input type="checkbox" /></th>
+                <th>候选人</th>
+                <th>应聘岗位</th>
+                <th>匹配分</th>
+                <th>核心标签</th>
+                <th>解析状态</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><input type="checkbox" /></td>
+                <td>
+                  <div class="cell-name">陈 * 宇</div>
+                  <div class="cell-sub">硕士 · 6 年经验 · 浙江大学</div>
+                </td>
+                <td>高级算法工程师</td>
+                <td>
+                  <div style="display:flex;align-items:center;gap:9px">
+                    <div class="ring" style="--v:94;--rc:#10b981;width:40px;height:40px;flex:0 0 40px"><span style="width:30px;height:30px;font-size:11px">94</span></div>
+                  </div>
+                </td>
+                <td><span class="tag blue">LLM 微调</span> <span class="tag cyan">RAG</span> <span class="tag gray">PyTorch</span></td>
+                <td><span class="tag ok">解析完成</span></td>
+                <td><button class="btn sm">查看画像</button></td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" /></td>
+                <td>
+                  <div class="cell-name">李 * 婷</div>
+                  <div class="cell-sub">本科 · 4 年经验 · 武汉大学</div>
+                </td>
+                <td>数据分析师 P6</td>
+                <td>
+                  <div style="display:flex;align-items:center;gap:9px">
+                    <div class="ring" style="--v:88;--rc:#10b981;width:40px;height:40px;flex:0 0 40px"><span style="width:30px;height:30px;font-size:11px">88</span></div>
+                  </div>
+                </td>
+                <td><span class="tag blue">SQL</span> <span class="tag cyan">指标体系</span></td>
+                <td><span class="tag ok">解析完成</span></td>
+                <td><button class="btn sm">查看画像</button></td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" /></td>
+                <td>
+                  <div class="cell-name">王 * 峰</div>
+                  <div class="cell-sub">硕士 · 8 年经验 · 清华大学</div>
+                </td>
+                <td>AI 产品经理</td>
+                <td>
+                  <div style="display:flex;align-items:center;gap:9px">
+                    <div class="ring" style="--v:76;--rc:#f59e0b;width:40px;height:40px;flex:0 0 40px"><span style="width:30px;height:30px;font-size:11px">76</span></div>
+                  </div>
+                </td>
+                <td><span class="tag violet">B 端产品</span> <span class="tag gray">AI 落地</span></td>
+                <td><span class="tag warn">解析中 62%</span></td>
+                <td><button class="btn sm">查看画像</button></td>
+              </tr>
+              <tr>
+                <td><input type="checkbox" /></td>
+                <td>
+                  <div class="cell-name">赵 * 涵</div>
+                  <div class="cell-sub">博士 · 3 年经验 · 上海交通大学</div>
+                </td>
+                <td>高级算法工程师</td>
+                <td>
+                  <div style="display:flex;align-items:center;gap:9px">
+                    <div class="ring" style="--v:91;--rc:#10b981;width:40px;height:40px;flex:0 0 40px"><span style="width:30px;height:30px;font-size:11px">91</span></div>
+                  </div>
+                </td>
+                <td><span class="tag blue">多模态</span> <span class="tag cyan">CV</span></td>
+                <td><span class="tag danger">扫描件 · 需复核</span></td>
+                <td><button class="btn sm">人工校验</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="grid-3" style="margin-top:14px">
+          <div class="card">
+            <div class="card-head"><h3>文档解析链路</h3></div>
+            <div class="kpi-line"><span class="k">MinerU · 版式还原</span><span class="tag ok">运行中</span></div>
+            <div class="kpi-line"><span class="k">OpenCV · 照片识别</span><span class="tag ok">运行中</span></div>
+            <div class="kpi-line"><span class="k">PyPDF · 文本抽取</span><span class="tag ok">运行中</span></div>
+            <div class="kpi-line"><span class="k">Milvus · 向量化入库</span><span class="tag ok">运行中</span></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h3>解析失败归因</h3><span class="tag gray">近 7 日</span></div>
+            <div class="kpi-line"><span class="k">扫描件模糊</span><span class="v">14 份</span></div>
+            <div class="kpi-line"><span class="k">非标准表格</span><span class="v">9 份</span></div>
+            <div class="kpi-line"><span class="k">加密 PDF</span><span class="v">4 份</span></div>
+            <div class="kpi-line"><span class="k">其他</span><span class="v">2 份</span></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h3>查重合并</h3><span class="tag violet">向量相似度</span></div>
+            <div class="kpi-line"><span class="k">相似度 ≥0.95 自动合并</span><span class="v">21 组</span></div>
+            <div class="kpi-line"><span class="k">0.85–0.95 待确认</span><span class="v">16 组</span></div>
+            <div class="kpi-line"><span class="k">合并节省人工</span><span class="v" style="color:var(--ok)">≈ 6.5 小时</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= PAGE: TALENT ================= -->
+      <section class="page" id="page-talent">
+        <div class="page-head">
+          <div>
+            <h1>人才画像档案</h1>
+            <p>百级标签体系 · 语义化自然语言检索 · 单/批量档案 RAG 问答</p>
+          </div>
+          <div class="head-actions">
+            <button class="btn">批量问答</button>
+            <button class="btn primary">+ 新建档案</button>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-head">
+              <h3>画像详情 · 陈 * 宇</h3>
+              <span class="tag ok">档案完整度 96%</span>
+            </div>
+
+            <div style="display:flex;gap:16px;align-items:center;margin-bottom:18px">
+              <div class="avatar" style="width:56px;height:56px;border-radius:16px;font-size:20px;flex:0 0 56px">陈</div>
+              <div style="flex:1">
+                <div style="font-size:16px;font-weight:700">陈 * 宇</div>
+                <div style="font-size:12.5px;color:var(--ink3);margin-top:5px">高级算法工程师 · 硕士 · 6 年经验 · 浙江大学</div>
+                <div style="margin-top:9px;display:flex;gap:7px;flex-wrap:wrap">
+                  <span class="tag blue">LLM 微调</span>
+                  <span class="tag cyan">RAG 架构</span>
+                  <span class="tag violet">多模态</span>
+                  <span class="tag gray">团队协作</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="radar-wrap">
+              <svg width="230" height="220" viewBox="0 0 220 220">
+                <polygon points="110,30 186,85 157,175 63,175 34,85" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+                <polygon points="110,70 148,98 134,142 86,142 72,98" fill="none" stroke="#e8eef8" stroke-width="1"/>
+                <polygon points="110,90 129,104 122,126 98,126 91,104" fill="none" stroke="#e8eef8" stroke-width="1"/>
+                <line x1="110" y1="110" x2="110" y2="30" stroke="#e2e8f0" stroke-width="1"/>
+                <line x1="110" y1="110" x2="186" y2="85" stroke="#e2e8f0" stroke-width="1"/>
+                <line x1="110" y1="110" x2="157" y2="175" stroke="#e2e8f0" stroke-width="1"/>
+                <line x1="110" y1="110" x2="63" y2="175" stroke="#e2e8f0" stroke-width="1"/>
+                <line x1="110" y1="110" x2="34" y2="85" stroke="#e2e8f0" stroke-width="1"/>
+                <polygon points="110,42 163,93 152,168 82,149 53,92"
+                         fill="rgba(59,130,246,.20)" stroke="#3b82f6" stroke-width="2" stroke-linejoin="round"/>
+                <circle cx="110" cy="42" r="3.5" fill="#3b82f6"/>
+                <circle cx="163" cy="93" r="3.5" fill="#3b82f6"/>
+                <circle cx="152" cy="168" r="3.5" fill="#3b82f6"/>
+                <circle cx="82" cy="149" r="3.5" fill="#3b82f6"/>
+                <circle cx="53" cy="92" r="3.5" fill="#3b82f6"/>
+                <text x="110" y="18" text-anchor="middle" font-size="11" fill="#64748b">技术深度</text>
+                <text x="199" y="84" text-anchor="middle" font-size="11" fill="#64748b">工程能力</text>
+                <text x="167" y="194" text-anchor="middle" font-size="11" fill="#64748b">业务理解</text>
+                <text x="53" y="194" text-anchor="middle" font-size="11" fill="#64748b">协作沟通</text>
+                <text x="20" y="84" text-anchor="middle" font-size="11" fill="#64748b">学习潜力</text>
+              </svg>
+            </div>
+
+            <div class="chips" style="margin-top:16px">
+              <span class="chip on">全部标签 108</span>
+              <span class="chip">技术栈 42</span>
+              <span class="chip">项目经历 26</span>
+              <span class="chip">软素质 21</span>
+              <span class="chip">证书 19</span>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div class="card">
+              <div class="card-head"><h3>档案 RAG 问答</h3><span class="tag cyan">可溯源</span></div>
+              <div class="chat">
+                <div class="msg user">
+                  <div class="msg-av">我</div>
+                  <div class="bubble">这位候选人是否有大规模模型落地的完整经验？</div>
+                </div>
+                <div class="msg">
+                  <div class="msg-av">AI</div>
+                  <div class="bubble">
+                    <b>结论：具备。</b>候选人在某头部互联网公司主导过 2 个 LLM 落地项目，覆盖<b>数据清洗 → 微调 → 推理优化 → 线上灰度</b>全链路，其中对话式客服模型日均调用量约 320 万次。
+                    <div class="cite"><span class="n">1</span>项目经历 · 2023.04–2024.11 · 主导角色</div>
+                    <div class="cite"><span class="n">2</span>技能标签 · LLM 微调 / LoRA / vLLM 推理优化</div>
+                  </div>
+                </div>
+              </div>
+              <div class="ask-bar" style="margin-top:14px">
+                <input placeholder="继续追问这位候选人的档案…" />
+                <button class="btn primary sm">发送</button>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-head"><h3>档案完整度分布</h3></div>
+              <div class="kpi-line"><span class="k">完整（≥90%）</span><span class="v" style="color:var(--ok)">8,214 人</span></div>
+              <div class="kpi-line"><span class="k">较完整（70–90%）</span><span class="v" style="color:var(--brand)">3,102 人</span></div>
+              <div class="kpi-line"><span class="k">待补充（&lt;70%）</span><span class="v" style="color:var(--warn)">1,170 人</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= PAGE: EXAM ================= -->
+      <section class="page" id="page-exam">
+        <div class="page-head">
+          <div>
+            <h1>智能测评</h1>
+            <p>大模型自适应题库（千人千卷）· 全流程自动调度 · AI 能力结构分析 · 动态能力评级</p>
+          </div>
+          <div class="head-actions">
+            <button class="btn">题库管理</button>
+            <button class="btn primary">+ 智能出卷</button>
+          </div>
+        </div>
+
+        <div class="stat-grid">
+          <div class="card stat">
+            <div class="stat-label"><i class="dot blue"></i>题库总量</div>
+            <div class="stat-num">18,420<span class="unit">题</span></div>
+            <div class="stat-foot">覆盖 26 个技术方向</div>
+          </div>
+          <div class="card stat">
+            <div class="stat-label"><i class="dot cyan"></i>本月生成试卷</div>
+            <div class="stat-num">1,086<span class="unit">套</span></div>
+            <div class="stat-foot up">千人千卷 100% 生效</div>
+          </div>
+          <div class="card stat">
+            <div class="stat-label"><i class="dot amber"></i>平均分</div>
+            <div class="stat-num">78.4<span class="unit">分</span></div>
+            <div class="stat-foot up">↑ 3.1 分 环比</div>
+          </div>
+          <div class="card stat">
+            <div class="stat-label"><i class="dot violet"></i>错题复盘覆盖率</div>
+            <div class="stat-num">92<span class="unit">%</span></div>
+            <div class="stat-foot">已生成复习计划 1,204 份</div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-head"><h3>近期考核成绩</h3><span class="tag gray">自动研判</span></div>
+            <table>
+              <thead>
+                <tr><th>考生</th><th>试卷</th><th>得分</th><th>能力评级</th><th>状态</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="cell-name">陈 * 宇</td>
+                  <td>高级算法 · A 卷</td>
+                  <td><b style="color:var(--ok)">94</b></td>
+                  <td><span class="tag ok">A+ 优秀</span></td>
+                  <td><span class="tag gray">已完成</span></td>
+                </tr>
+                <tr>
+                  <td class="cell-name">李 * 婷</td>
+                  <td>数据分析 · B 卷</td>
+                  <td><b style="color:var(--ok)">88</b></td>
+                  <td><span class="tag ok">A 良好</span></td>
+                  <td><span class="tag gray">已完成</span></td>
+                </tr>
+                <tr>
+                  <td class="cell-name">王 * 峰</td>
+                  <td>AI 产品 · A 卷</td>
+                  <td><b style="color:var(--warn)">71</b></td>
+                  <td><span class="tag warn">B 待提升</span></td>
+                  <td><span class="tag gray">已完成</span></td>
+                </tr>
+                <tr>
+                  <td class="cell-name">赵 * 涵</td>
+                  <td>高级算法 · C 卷</td>
+                  <td><b>—</b></td>
+                  <td><span class="tag gray">待研判</span></td>
+                  <td><span class="tag warn">考试中 42%</span></td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="empty-note">※ 系统按答题轨迹动态调节后续题目难度，实现"千人千卷"。</div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h3>能力结构分析 · 陈 * 宇</h3><span class="tag blue">动态评级 A+</span></div>
+            <div class="radar-wrap">
+              <svg width="220" height="210" viewBox="0 0 220 220">
+                <polygon points="110,30 186,85 157,175 63,175 34,85" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+                <polygon points="110,70 148,98 134,142 86,142 72,98" fill="none" stroke="#e8eef8" stroke-width="1"/>
+                <line x1="110" y1="110" x2="110" y2="30" stroke="#e2e8f0" stroke-width="1"/>
+                <line x1="110" y1="110" x2="186" y2="85" stroke="#e2e8f0" stroke-width="1"/>
+                <line x1="110" y1="110" x2="157" y2="175" stroke="#e2e8f0" stroke-width="1"/>
+                <line x1="110" y1="110" x2="63" y2="175" stroke="#e2e8f0" stroke-width="1"/>
+                <line x1="110" y1="110" x2="34" y2="85" stroke="#e2e8f0" stroke-width="1"/>
+                <polygon points="110,38 170,90 150,172 76,158 42,88"
+                         fill="rgba(139,92,246,.18)" stroke="#8b5cf6" stroke-width="2" stroke-linejoin="round"/>
+                <text x="110" y="18" text-anchor="middle" font-size="11" fill="#64748b">算法理论</text>
+                <text x="199" y="84" text-anchor="middle" font-size="11" fill="#64748b">工程落地</text>
+                <text x="167" y="194" text-anchor="middle" font-size="11" fill="#64748b">系统设计</text>
+                <text x="53" y="194" text-anchor="middle" font-size="11" fill="#64748b">数据处理</text>
+                <text x="20" y="84" text-anchor="middle" font-size="11" fill="#64748b">业务抽象</text>
+              </svg>
+            </div>
+            <div class="kpi-line"><span class="k">优势项</span><span class="v" style="color:var(--ok)">算法理论 · 工程落地</span></div>
+            <div class="kpi-line"><span class="k">待补强项</span><span class="v" style="color:var(--warn)">业务抽象</span></div>
+            <div class="kpi-line"><span class="k">推荐学习路径</span><span class="v">业务建模 12 课时</span></div>
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <div class="card">
+            <div class="card-head"><h3>智能出卷配置</h3></div>
+            <div class="kpi-line"><span class="k">目标岗位</span><span class="v">高级算法工程师</span></div>
+            <div class="kpi-line"><span class="k">难度分布</span><span class="v">易 30% / 中 50% / 难 20%</span></div>
+            <div class="kpi-line"><span class="k">题量</span><span class="v">40 题 · 90 分钟</span></div>
+            <div class="kpi-line"><span class="k">自适应难度</span><span class="tag ok">已开启</span></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h3>AI 面试间</h3><span class="tag violet">进行中 6 场</span></div>
+            <div class="kpi-line"><span class="k">今日排期</span><span class="v">24 场</span></div>
+            <div class="kpi-line"><span class="k">平均时长</span><span class="v">32 分钟</span></div>
+            <div class="kpi-line"><span class="k">面试评价生成</span><span class="tag ok">自动</span></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h3>错题复盘</h3><span class="tag warn">Top 3 薄弱点</span></div>
+            <div class="kpi-line"><span class="k">分布式训练调优</span><span class="v">错误率 46%</span></div>
+            <div class="kpi-line"><span class="k">向量检索召回</span><span class="v">错误率 38%</span></div>
+            <div class="kpi-line"><span class="k">Prompt 工程</span><span class="v">错误率 31%</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= PAGE: MATCH ================= -->
+      <section class="page" id="page-match">
+        <div class="page-head">
+          <div>
+            <h1>岗位-人才精准匹配</h1>
+            <p>岗位结构化解析 → 向量建模 · 0–100 匹配分 · 匹配原因可解释 · 岗位空缺预警与储备推荐</p>
+          </div>
+          <div class="head-actions">
+            <button class="btn">岗位条件配置</button>
+            <button class="btn primary">+ 新建匹配任务</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-head">
+            <h3>当前岗位：高级算法工程师（AI 平台部）</h3>
+            <span class="tag danger">缺口 17 人</span>
+          </div>
+          <div class="chips">
+            <span class="chip on">硕士及以上</span>
+            <span class="chip on">5 年以上</span>
+            <span class="chip on">LLM / RAG 经验</span>
+            <span class="chip on">PyTorch</span>
+            <span class="chip">分布式训练</span>
+            <span class="chip">顶会论文优先</span>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-head"><h3>匹配结果（按匹配分排序）</h3><span class="tag gray">共 42 位候选</span></div>
+
+            <div class="row">
+              <div class="ring" style="--v:94;--rc:#10b981"><span>94</span></div>
+              <div class="grow">
+                <div class="t1">陈 * 宇 · 硕士 · 6 年</div>
+                <div class="t2">LLM 微调 / RAG / 分布式训练 · 完全命中核心要求</div>
+              </div>
+              <button class="btn sm">查看</button>
+            </div>
+
+            <div class="row">
+              <div class="ring" style="--v:91;--rc:#10b981"><span>91</span></div>
+              <div class="grow">
+                <div class="t1">赵 * 涵 · 博士 · 3 年</div>
+                <div class="t2">多模态 / CV / 顶会 3 篇 · 经验年限略低</div>
+              </div>
+              <button class="btn sm">查看</button>
+            </div>
+
+            <div class="row">
+              <div class="ring" style="--v:85;--rc:#10b981"><span>85</span></div>
+              <div class="grow">
+                <div class="t1">孙 * 明 · 硕士 · 7 年</div>
+                <div class="t2">推荐系统 / 特征工程 · RAG 经验较弱</div>
+              </div>
+              <button class="btn sm">查看</button>
+            </div>
+
+            <div class="row">
+              <div class="ring" style="--v:72;--rc:#f59e0b"><span>72</span></div>
+              <div class="grow">
+                <div class="t1">周 * 琳 · 本科 · 5 年</div>
+                <div class="t2">后端开发 / 高并发 · 算法经验不足</div>
+              </div>
+              <button class="btn sm">查看</button>
+            </div>
+
+            <div class="row">
+              <div class="ring" style="--v:64;--rc:#f59e0b"><span>64</span></div>
+              <div class="grow">
+                <div class="t1">吴 * 涛 · 硕士 · 4 年</div>
+                <div class="t2">数据分析 / SQL · 岗位方向差异较大</div>
+              </div>
+              <button class="btn sm">查看</button>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div class="card">
+              <div class="card-head"><h3>匹配原因可解释</h3><span class="tag blue">陈 * 宇 · 94 分</span></div>
+              <div class="kpi-line"><span class="k">技术栈匹配度</span><span class="v" style="color:var(--ok)">96 / 100</span></div>
+              <div class="kpi-line"><span class="k">经验年限匹配</span><span class="v" style="color:var(--ok)">92 / 100</span></div>
+              <div class="kpi-line"><span class="k">学历匹配</span><span class="v" style="color:var(--ok)">100 / 100</span></div>
+              <div class="kpi-line"><span class="k">行业背景匹配</span><span class="v" style="color:var(--warn)">81 / 100</span></div>
+              <div class="kpi-line"><span class="k">稳定性预测</span><span class="v">良好</span></div>
+              <div class="empty-note">
+                命中：LLM 微调（LoRA/QLoRA）、RAG 架构、vLLM 推理优化、分布式训练<br/>
+                缺口：缺少推荐系统与搜索排序经验（占比 8%）
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-head"><h3>岗位空缺预警 &amp; 储备推荐</h3></div>
+              <div class="kpi-line"><span class="k">空缺岗位数</span><span class="v" style="color:var(--danger)">17</span></div>
+              <div class="kpi-line"><span class="k">自动推荐储备人才</span><span class="v">24 人</span></div>
+              <div class="kpi-line"><span class="k">已发出面试邀约</span><span class="v">9 人</span></div>
+              <div class="kpi-line"><span class="k">预计闭环周期</span><span class="v">18 天</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= PAGE: TRAINING ================= -->
+      <section class="page" id="page-training">
+        <div class="page-head">
+          <div>
+            <h1>AI 个性化智能培训成长</h1>
+            <p>能力缺口诊断 · 千人千面培训方案 · 学习全流程管控（防挂机）· 成长轨迹可视化</p>
+          </div>
+          <div class="head-actions">
+            <button class="btn">生成培训方案</button>
+            <button class="btn primary">+ 新建课程</button>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-head"><h3>能力缺口诊断 · 王 * 峰（AI 产品经理）</h3><span class="tag warn">3 项待补强</span></div>
+
+            <div style="margin-bottom:16px">
+              <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:7px">
+                <span>大模型原理与能力边界</span><span style="color:var(--danger);font-weight:700">42 / 100</span>
+              </div>
+              <div class="progress red"><i style="width:42%"></i></div>
+            </div>
+
+            <div style="margin-bottom:16px">
+              <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:7px">
+                <span>AI 产品需求拆解</span><span style="color:var(--warn);font-weight:700">61 / 100</span>
+              </div>
+              <div class="progress amber"><i style="width:61%"></i></div>
+            </div>
+
+            <div style="margin-bottom:16px">
+              <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:7px">
+                <span>数据指标设计</span><span style="color:var(--warn);font-weight:700">68 / 100</span>
+              </div>
+              <div class="progress amber"><i style="width:68%"></i></div>
+            </div>
+
+            <div style="margin-bottom:6px">
+              <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:7px">
+                <span>跨部门协作与推动</span><span style="color:var(--ok);font-weight:700">86 / 100</span>
+              </div>
+              <div class="progress green"><i style="width:86%"></i></div>
+            </div>
+
+            <div class="empty-note">※ 诊断结果由测评数据 + 岗位胜任力模型 + 上级评价三路融合生成。</div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h3>AI 推荐培训方案</h3><span class="tag violet">千人千面</span></div>
+
+            <div class="row">
+              <div class="agent-ico v">01</div>
+              <div class="grow">
+                <div class="t1">大模型原理与工程化落地</div>
+                <div class="t2">24 课时 · 视频 + 实操 · 预计 3 周</div>
+              </div>
+              <span class="tag blue">必修</span>
+            </div>
+
+            <div class="row">
+              <div class="agent-ico c">02</div>
+              <div class="grow">
+                <div class="t1">AI 产品需求拆解实战</div>
+                <div class="t2">16 课时 · 案例研讨 · 预计 2 周</div>
+              </div>
+              <span class="tag blue">必修</span>
+            </div>
+
+            <div class="row">
+              <div class="agent-ico a">03</div>
+              <div class="grow">
+                <div class="t1">数据指标体系设计</div>
+                <div class="t2">12 课时 · 工作坊 · 预计 1.5 周</div>
+              </div>
+              <span class="tag gray">选修</span>
+            </div>
+
+            <div class="empty-note">完成全部必修后，系统将自动安排结业测评并更新能力画像。</div>
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <div class="card">
+            <div class="card-head"><h3>课程进度</h3><span class="tag gray">在学 1,204 人</span></div>
+            <div class="kpi-line"><span class="k">岗前培养方案</span><span class="v">328 人在学</span></div>
+            <div class="kpi-line"><span class="k">培训课程</span><span class="v">726 人在学</span></div>
+            <div class="kpi-line"><span class="k">复习计划</span><span class="v">150 人在学</span></div>
+            <div class="kpi-line"><span class="k">平均完成率</span><span class="v" style="color:var(--ok)">73%</span></div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h3>学习全流程管控</h3><span class="tag ok">防挂机已开启</span></div>
+            <div class="kpi-line"><span class="k">人脸抽检</span><span class="tag ok">每 5 分钟</span></div>
+            <div class="kpi-line"><span class="k">交互行为检测</span><span class="tag ok">实时</span></div>
+            <div class="kpi-line"><span class="k">今日异常告警</span><span class="v" style="color:var(--warn)">6 次</span></div>
+            <div class="kpi-line"><span class="k">学时有效性校验</span><span class="tag ok">已启用</span></div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h3>成长轨迹</h3><span class="tag blue">近 6 个月</span></div>
+            <div class="bars" style="height:110px">
+              <div class="bar-item"><div class="bar-wrap"><div class="bar c" style="height:40%"></div></div><span>4月</span></div>
+              <div class="bar-item"><div class="bar-wrap"><div class="bar c" style="height:55%"></div></div><span>5月</span></div>
+              <div class="bar-item"><div class="bar-wrap"><div class="bar c" style="height:48%"></div></div><span>6月</span></div>
+              <div class="bar-item"><div class="bar-wrap"><div class="bar c" style="height:70%"></div></div><span>7月</span></div>
+              <div class="bar-item"><div class="bar-wrap"><div class="bar c" style="height:78%"></div></div><span>8月</span></div>
+              <div class="bar-item"><div class="bar-wrap"><div class="bar c" style="height:88%"></div></div><span>9月</span></div>
+            </div>
+            <div class="legend"><span><i style="background:#06b6d4"></i>能力综合指数</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= PAGE: DATA ================= -->
+      <section class="page" id="page-data">
+        <div class="page-head">
+          <div>
+            <h1>自然语言智能数据决策</h1>
+            <p>口语化自由问数 · 自动多维分析 · 自动出图 · 一键生成 Word / PDF 报告 · 行/字段级权限联动</p>
+          </div>
+          <div class="head-actions">
+            <button class="btn">导出 Word</button>
+            <button class="btn primary">导出 PDF 报告</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:14px">
+          <div class="chat">
+            <div class="msg user">
+              <div class="msg-av">我</div>
+              <div class="bubble">统计近 6 个月各事业部的招聘完成率与人均培训时长，做个对比</div>
+            </div>
+
+            <div class="msg">
+              <div class="msg-av">AI</div>
+              <div class="bubble">
+                <b>已生成分析结果。</b>近 6 个月集团整体招聘完成率 82.4%，其中 <b>AI 平台事业部</b> 以 94.1% 领先，<b>智能制造事业部</b> 最低（68.3%）；人均培训时长整体呈上升趋势，9 月达到 12.6 小时 / 人。
+                <div class="cite"><span class="n">SQL</span>已生成并执行 · 权限范围：全集团（行级）· 耗时 1.8s</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid-2 even" style="margin-top:18px">
+            <div>
+              <div style="font-size:13px;font-weight:700;margin-bottom:12px">各事业部招聘完成率（%）</div>
+              <div class="bars" style="height:140px">
+                <div class="bar-item"><div class="bar-wrap"><div class="bar" style="height:94%"></div></div><span>AI 平台</span></div>
+                <div class="bar-item"><div class="bar-wrap"><div class="bar" style="height:86%"></div></div><span>云服务</span></div>
+                <div class="bar-item"><div class="bar-wrap"><div class="bar" style="height:81%"></div></div><span>数字金融</span></div>
+                <div class="bar-item"><div class="bar-wrap"><div class="bar" style="height:74%"></div></div><span>智慧城市</span></div>
+                <div class="bar-item"><div class="bar-wrap"><div class="bar" style="height:68%"></div></div><span>智能制造</span></div>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:13px;font-weight:700;margin-bottom:12px">人均培训时长趋势（小时）</div>
+              <div class="bars" style="height:140px">
+                <div class="bar-item"><div class="bar-wrap"><div class="bar v" style="height:52%"></div></div><span>4月</span></div>
+                <div class="bar-item"><div class="bar-wrap"><div class="bar v" style="height:60%"></div></div><span>5月</span></div>
+                <div class="bar-item"><div class="bar-wrap"><div class="bar v" style="height:57%"></div></div><span>6月</span></div>
+                <div class="bar-item"><div class="bar-wrap"><div class="bar v" style="height:72%"></div></div><span>7月</span></div>
+                <div class="bar-item"><div class="bar-wrap"><div class="bar v" style="height:83%"></div></div><span>8月</span></div>
+                <div class="bar-item"><div class="bar-wrap"><div class="bar v" style="height:92%"></div></div><span>9月</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card" style="padding:0;overflow:hidden">
+            <table>
+              <thead>
+                <tr><th>事业部</th><th>招聘完成率</th><th>人均培训时长</th><th>人才缺口</th></tr>
+              </thead>
+              <tbody>
+                <tr><td class="cell-name">AI 平台事业部</td><td><b style="color:var(--ok)">94.1%</b></td><td>14.2 h</td><td><span class="tag danger">17 人</span></td></tr>
+                <tr><td class="cell-name">云服务事业部</td><td><b style="color:var(--ok)">86.3%</b></td><td>12.8 h</td><td><span class="tag warn">8 人</span></td></tr>
+                <tr><td class="cell-name">数字金融事业部</td><td>81.2%</td><td>11.6 h</td><td><span class="tag warn">6 人</span></td></tr>
+                <tr><td class="cell-name">智慧城市事业部</td><td>74.5%</td><td>10.4 h</td><td><span class="tag gray">3 人</span></td></tr>
+                <tr><td class="cell-name">智能制造事业部</td><td><b style="color:var(--warn)">68.3%</b></td><td>9.1 h</td><td><span class="tag gray">2 人</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div class="card">
+              <div class="card-head"><h3>智能决策建议</h3><span class="tag violet">AI 生成</span></div>
+              <div class="kpi-line"><span class="k">建议 1</span><span class="v" style="text-align:right;font-weight:500;font-size:12.5px">智能制造事业部招聘周期偏长，建议放宽学历硬条件</span></div>
+              <div class="kpi-line"><span class="k">建议 2</span><span class="v" style="text-align:right;font-weight:500;font-size:12.5px">AI 平台事业部缺口最大，建议启用储备人才池直招</span></div>
+              <div class="kpi-line"><span class="k">建议 3</span><span class="v" style="text-align:right;font-weight:500;font-size:12.5px">培训时长与招聘完成率正相关，建议加大培训投入</span></div>
+            </div>
+
+            <div class="card">
+              <div class="card-head"><h3>权限与合规</h3><span class="tag ok">已校验</span></div>
+              <div class="kpi-line"><span class="k">当前角色</span><span class="v">管理层 · 全集团</span></div>
+              <div class="kpi-line"><span class="k">行级权限</span><span class="tag ok">已生效</span></div>
+              <div class="kpi-line"><span class="k">字段级脱敏</span><span class="tag ok">薪资字段已屏蔽</span></div>
+              <div class="kpi-line"><span class="k">查询留痕</span><span class="tag ok">已写入审计日志</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ask-bar" style="margin-top:14px">
+          <input placeholder="用自然语言继续追问，例如：对比一下各事业部的离职率…" />
+          <button class="btn primary">发送</button>
+        </div>
+      </section>
+
+      <!-- ================= PAGE: KB ================= -->
+      <section class="page" id="page-kb">
+        <div class="page-head">
+          <div>
+            <h1>企业级人才 RAG 智能问答知识库</h1>
+            <p>100% 私有化部署 · 精准无幻觉可溯源 · 分级权限问答（员工 / HR / 管理层）</p>
+          </div>
+          <div class="head-actions">
+            <button class="btn">知识库管理</button>
+            <button class="btn primary">+ 导入文档</button>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-head">
+              <h3>知识问答</h3>
+              <div class="chips" style="margin:0">
+                <span class="chip on">员工级</span>
+                <span class="chip">HR 级</span>
+                <span class="chip">管理层</span>
+              </div>
+            </div>
+
+            <div class="chat">
+              <div class="msg user">
+                <div class="msg-av">我</div>
+                <div class="bubble">研发序列 P6 晋升到 P7，需要满足哪些条件？</div>
+              </div>
+              <div class="msg">
+                <div class="msg-av">AI</div>
+                <div class="bubble">
+                  根据《研发序列职级晋升管理办法（2026 修订版）》，P6 → P7 需同时满足以下条件：<br/>
+                  <b>1. 任职年限：</b>P6 岗位任职满 2 年；<br/>
+                  <b>2. 绩效要求：</b>近 2 年绩效至少 1 次 A、且无 C；<br/>
+                  <b>3. 能力评估：</b>通过晋升答辩，技术深度与系统设计维度达到 L3 标准；<br/>
+                  <b>4. 项目贡献：</b>主导过至少 1 个跨团队重点项目。
+                  <div class="cite"><span class="n">1</span>《研发序列职级晋升管理办法（2026 修订版）》第 3.2 节</div>
+                  <div class="cite"><span class="n">2</span>《技术能力评估标准》第 2 章 · L3 能力项定义</div>
+                </div>
+              </div>
+              <div class="msg user">
+                <div class="msg-av">我</div>
+                <div class="bubble">如果绩效差一点点，有没有特批通道？</div>
+              </div>
+              <div class="msg">
+                <div class="msg-av">AI</div>
+                <div class="bubble">
+                  <b>存在。</b>办法第 4.1 条规定：对承担关键攻坚任务或拥有核心专利的员工，可由部门负责人发起"特批晋升"，需经技术委员会 2/3 以上成员同意。
+                  <div class="cite"><span class="n">1</span>《研发序列职级晋升管理办法（2026 修订版）》第 4.1 节</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="ask-bar" style="margin-top:16px">
+              <input placeholder="输入你的问题，例如：年假怎么计算？" />
+              <button class="btn primary sm">发送</button>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div class="card">
+              <div class="card-head"><h3>知识库底座</h3><span class="tag ok">私有化</span></div>
+              <div class="kpi-line"><span class="k">向量库</span><span class="v">Milvus · 2,486 万向量</span></div>
+              <div class="kpi-line"><span class="k">知识图谱</span><span class="v">Neo4j · 增强溯源</span></div>
+              <div class="kpi-line"><span class="k">文档总量</span><span class="v">12,840 份</span></div>
+              <div class="kpi-line"><span class="k">检索时延</span><span class="v" style="color:var(--ok)">186 ms</span></div>
+              <div class="kpi-line"><span class="k">回答溯源命中率</span><span class="v" style="color:var(--ok)">96.7%</span></div>
+            </div>
+
+            <div class="card">
+              <div class="card-head"><h3>幻觉抑制与安全护栏</h3><span class="tag cyan">AI Safety</span></div>
+              <div class="kpi-line"><span class="k">无引用不回答</span><span class="tag ok">已开启</span></div>
+              <div class="kpi-line"><span class="k">敏感词拦截</span><span class="tag ok">已开启</span></div>
+              <div class="kpi-line"><span class="k">越权访问拦截</span><span class="v">今日 14 次</span></div>
+              <div class="kpi-line"><span class="k">回答置信度阈值</span><span class="v">≥ 0.82</span></div>
+            </div>
+
+            <div class="card">
+              <div class="card-head"><h3>分级权限</h3></div>
+              <div class="kpi-line"><span class="k">普通员工</span><span class="v">制度 / 政策 / 流程</span></div>
+              <div class="kpi-line"><span class="k">HR / 招聘</span><span class="v">+ 薪酬带宽 / 编制</span></div>
+              <div class="kpi-line"><span class="k">管理层</span><span class="v">+ 组织诊断 / 决策建议</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= PAGE: AGENT ================= -->
+      <section class="page" id="page-agent">
+        <div class="page-head">
+          <div>
+            <h1>Agent 编排中心</h1>
+            <p>五大专属 Agent · LangGraph 有状态工作流 · 可视化编排 · 多样化触发 · 统一中台管控</p>
+          </div>
+          <div class="head-actions">
+            <button class="btn">任务调度</button>
+            <button class="btn primary">+ 新建智能体</button>
+          </div>
+        </div>
+
+        <div class="grid-4">
+          <div class="card">
+            <div class="agent-ico" style="margin-bottom:11px">档案</div>
+            <div style="font-size:13.5px;font-weight:700">档案解析 Agent</div>
+            <div style="font-size:11.5px;color:var(--ink3);margin:6px 0 11px">多格式解析 · 标签抽取 · 查重合并</div>
+            <span class="tag ok">● 已发布</span>
+          </div>
+          <div class="card">
+            <div class="agent-ico v" style="margin-bottom:11px">测评</div>
+            <div style="font-size:13.5px;font-weight:700">测评分析 Agent</div>
+            <div style="font-size:11.5px;color:var(--ink3);margin:6px 0 11px">自适应出题 · 能力研判 · 错题复盘</div>
+            <span class="tag ok">● 已发布</span>
+          </div>
+          <div class="card">
+            <div class="agent-ico c" style="margin-bottom:11px">匹配</div>
+            <div style="font-size:13.5px;font-weight:700">岗位匹配 Agent</div>
+            <div style="font-size:11.5px;color:var(--ink3);margin:6px 0 11px">向量建模 · 匹配打分 · 原因解释</div>
+            <span class="tag ok">● 已发布</span>
+          </div>
+          <div class="card">
+            <div class="agent-ico a" style="margin-bottom:11px">培训</div>
+            <div style="font-size:13.5px;font-weight:700">培训赋能 Agent</div>
+            <div style="font-size:11.5px;color:var(--ink3);margin:6px 0 11px">缺口诊断 · 方案生成 · 学习管控</div>
+            <span class="tag warn">● 灰度中</span>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-head">
+            <h3>可视化编排画布<span class="sub">拖拽节点 · 连线编排 · 支持条件分支</span></h3>
+            <div style="display:flex;gap:8px">
+              <button class="btn sm">保存</button>
+              <button class="btn sm primary">试运行</button>
+            </div>
+          </div>
+
+          <div class="canvas">
+            <svg class="flow-lines" viewBox="0 0 1000 400" preserveAspectRatio="none">
+              <defs>
+                <marker id="arw" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+                  <path d="M0,0 L8,4 L0,8 z" fill="#c3cee0"/>
+                </marker>
+              </defs>
+              <path d="M190,200 L240,200" stroke="#c3cee0" stroke-width="2" fill="none" marker-end="url(#arw)" vector-effect="non-scaling-stroke"/>
+              <path d="M390,200 L440,200" stroke="#c3cee0" stroke-width="2" fill="none" marker-end="url(#arw)" vector-effect="non-scaling-stroke"/>
+              <path d="M590,200 L640,110" stroke="#c3cee0" stroke-width="2" fill="none" marker-end="url(#arw)" vector-effect="non-scaling-stroke"/>
+              <path d="M590,200 L640,290" stroke="#c3cee0" stroke-width="2" fill="none" marker-end="url(#arw)" vector-effect="non-scaling-stroke"/>
+              <path d="M790,110 L840,200" stroke="#c3cee0" stroke-width="2" fill="none" marker-end="url(#arw)" vector-effect="non-scaling-stroke"/>
+              <path d="M790,290 L840,200" stroke="#c3cee0" stroke-width="2" fill="none" marker-end="url(#arw)" vector-effect="non-scaling-stroke"/>
+            </svg>
+
+            <div class="node" style="left:4%;top:42.5%">简历上传<em>触发节点</em></div>
+            <div class="node" style="left:24%;top:42.5%">MinerU 解析<em>文档处理</em></div>
+            <div class="node hl" style="left:44%;top:42.5%">向量化入库<em>Milvus</em></div>
+            <div class="node hl" style="left:64%;top:20%">岗位匹配 Agent<em>打分 + 解释</em></div>
+            <div class="node pk" style="left:64%;top:65%">测评分析 Agent<em>能力研判</em></div>
+            <div class="node" style="left:84%;top:42.5%">输出决策<em>通知 / 报告</em></div>
+          </div>
+
+          <div class="legend">
+            <span><i style="background:#e6f0ff;border:1px solid #93c5fd"></i>AI 处理节点</span>
+            <span><i style="background:#f1ebff;border:1px solid #c4b5fd"></i>智能体节点</span>
+            <span><i style="background:#fff;border:1px solid #dbe4f3"></i>通用节点</span>
+          </div>
+        </div>
+
+        <div class="grid-3">
+          <div class="card">
+            <div class="card-head"><h3>任务调度</h3><span class="tag ok">Celery 运行中</span></div>
+            <div class="kpi-line"><span class="k">排队任务</span><span class="v">14</span></div>
+            <div class="kpi-line"><span class="k">执行中</span><span class="v">6</span></div>
+            <div class="kpi-line"><span class="k">今日完成</span><span class="v" style="color:var(--ok)">2,486</span></div>
+            <div class="kpi-line"><span class="k">失败重试</span><span class="v" style="color:var(--warn)">3</span></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h3>数字员工</h3><span class="tag blue">7×24</span></div>
+            <div class="kpi-line"><span class="k">数字机器人</span><span class="v">12 个</span></div>
+            <div class="kpi-line"><span class="k">数字员工任务</span><span class="v">86 项 / 日</span></div>
+            <div class="kpi-line"><span class="k">替代人工时长</span><span class="v" style="color:var(--ok)">≈ 42 h / 日</span></div>
+          </div>
+          <div class="card">
+            <div class="card-head"><h3>模型供应商</h3><span class="tag violet">中台</span></div>
+            <div class="kpi-line"><span class="k">已接入模型</span><span class="v">6 个</span></div>
+            <div class="kpi-line"><span class="k">主推理模型</span><span class="v">私有化部署</span></div>
+            <div class="kpi-line"><span class="k">Token 消耗（本月）</span><span class="v">2,148 万</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= PAGE: SYSTEM ================= -->
+      <section class="page" id="page-system">
+        <div class="page-head">
+          <div>
+            <h1>系统管理</h1>
+            <p>用户 / 部门 / 角色 / 菜单 / 日志 · 精细化多级权限（角色 · 行级 · 字段级）</p>
+          </div>
+          <div class="head-actions">
+            <button class="btn">操作日志</button>
+            <button class="btn primary">+ 新增用户</button>
+          </div>
+        </div>
+
+        <div class="tabs">
+          <div class="tab on" data-tab="t-user">用户管理</div>
+          <div class="tab" data-tab="t-role">角色与权限</div>
+          <div class="tab" data-tab="t-log">审计日志</div>
+        </div>
+
+        <div class="tab-panel on" id="t-user">
+          <div class="card" style="padding:0;overflow:hidden">
+            <table>
+              <thead>
+                <tr><th>姓名</th><th>部门</th><th>角色</th><th>数据权限范围</th><th>状态</th><th>操作</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><div class="cell-name">系统管理员</div><div class="cell-sub">admin@corp.com</div></td>
+                  <td>信息技术部</td>
+                  <td><span class="tag violet">超级管理员</span></td>
+                  <td><span class="tag ok">全集团 · 全字段</span></td>
+                  <td><span class="tag ok">正常</span></td>
+                  <td><button class="btn sm">编辑</button></td>
+                </tr>
+                <tr>
+                  <td><div class="cell-name">张 * 敏</div><div class="cell-sub">zhangm@corp.com</div></td>
+                  <td>人力资源部</td>
+                  <td><span class="tag blue">HR 管理员</span></td>
+                  <td><span class="tag warn">本部门 · 薪资脱敏</span></td>
+                  <td><span class="tag ok">正常</span></td>
+                  <td><button class="btn sm">编辑</button></td>
+                </tr>
+                <tr>
+                  <td><div class="cell-name">刘 * 强</div><div class="cell-sub">liuq@corp.com</div></td>
+                  <td>AI 平台事业部</td>
+                  <td><span class="tag cyan">业务负责人</span></td>
+                  <td><span class="tag warn">本事业部 · 部分字段</span></td>
+                  <td><span class="tag ok">正常</span></td>
+                  <td><button class="btn sm">编辑</button></td>
+                </tr>
+                <tr>
+                  <td><div class="cell-name">陈 * 宇</div><div class="cell-sub">cheny@corp.com</div></td>
+                  <td>AI 平台事业部</td>
+                  <td><span class="tag gray">普通员工</span></td>
+                  <td><span class="tag gray">仅本人数据</span></td>
+                  <td><span class="tag ok">正常</span></td>
+                  <td><button class="btn sm">编辑</button></td>
+                </tr>
+                <tr>
+                  <td><div class="cell-name">吴 * 涛</div><div class="cell-sub">wut@corp.com</div></td>
+                  <td>数据智能部</td>
+                  <td><span class="tag gray">普通员工</span></td>
+                  <td><span class="tag gray">仅本人数据</span></td>
+                  <td><span class="tag danger">已停用</span></td>
+                  <td><button class="btn sm">编辑</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="tab-panel" id="t-role">
+          <div class="grid-3">
+            <div class="card">
+              <div class="card-head"><h3>角色：HR 管理员</h3><span class="tag blue">12 人</span></div>
+              <div class="kpi-line"><span class="k">功能权限</span><span class="v">简历 / 岗位 / 测评 / 培训</span></div>
+              <div class="kpi-line"><span class="k">行级权限</span><span class="tag ok">本部门及下级</span></div>
+              <div class="kpi-line"><span class="k">字段级权限</span><span class="tag warn">薪资字段脱敏</span></div>
+              <div class="kpi-line"><span class="k">数据导出</span><span class="tag ok">允许（含水印）</span></div>
+            </div>
+            <div class="card">
+              <div class="card-head"><h3>角色：业务负责人</h3><span class="tag cyan">36 人</span></div>
+              <div class="kpi-line"><span class="k">功能权限</span><span class="v">岗位匹配 / 缺口 / 培训</span></div>
+              <div class="kpi-line"><span class="k">行级权限</span><span class="tag ok">本事业部</span></div>
+              <div class="kpi-line"><span class="k">字段级权限</span><span class="tag warn">联系方式脱敏</span></div>
+              <div class="kpi-line"><span class="k">数据导出</span><span class="tag warn">需审批</span></div>
+            </div>
+            <div class="card">
+              <div class="card-head"><h3>角色：普通员工</h3><span class="tag gray">8,420 人</span></div>
+              <div class="kpi-line"><span class="k">功能权限</span><span class="v">知识问答 / 测评 / 学习</span></div>
+              <div class="kpi-line"><span class="k">行级权限</span><span class="tag ok">仅本人</span></div>
+              <div class="kpi-line"><span class="k">字段级权限</span><span class="tag ok">全部脱敏</span></div>
+              <div class="kpi-line"><span class="k">数据导出</span><span class="tag danger">禁止</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-panel" id="t-log">
+          <div class="card" style="padding:0;overflow:hidden">
+            <table>
+              <thead>
+                <tr><th>时间</th><th>操作人</th><th>操作类型</th><th>对象</th><th>结果</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>2026-09-27 14:32</td><td>张 * 敏</td><td><span class="tag blue">批量导出简历</span></td><td>高级算法工程师 · 42 份</td><td><span class="tag ok">成功</span></td></tr>
+                <tr><td>2026-09-27 14:18</td><td>系统</td><td><span class="tag violet">AI 调用</span></td><td>岗位匹配 Agent · 批次 #2486</td><td><span class="tag ok">成功</span></td></tr>
+                <tr><td>2026-09-27 13:56</td><td>吴 * 涛</td><td><span class="tag danger">越权访问</span></td><td>薪酬带宽表</td><td><span class="tag danger">已拦截</span></td></tr>
+                <tr><td>2026-09-27 11:20</td><td>刘 * 强</td><td><span class="tag cyan">智能问数</span></td><td>本事业部招聘完成率</td><td><span class="tag ok">成功</span></td></tr>
+                <tr><td>2026-09-27 10:04</td><td>系统管理员</td><td><span class="tag gray">修改角色权限</span></td><td>HR 管理员 · 字段级</td><td><span class="tag ok">成功</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= PAGE: STACK ================= -->
+      <section class="page" id="page-stack">
+        <div class="page-head">
+          <div>
+            <h1>技术架构现状与差距</h1>
+            <p>需求强制技术栈 vs 仓库实际落地 · 偏差等级与决策建议（截至 2026-09-27）</p>
+          </div>
+          <div class="head-actions">
+            <button class="btn">导出对比报告</button>
+          </div>
+        </div>
+
+        <div class="stat-grid">
+          <div class="card stat">
+            <div class="stat-label"><i class="dot green"></i>已完全落地</div>
+            <div class="stat-num">5<span class="unit">项</span></div>
+            <div class="stat-foot">FastAPI / SQLAlchemy / MySQL / Milvus / LangGraph</div>
+          </div>
+          <div class="card stat">
+            <div class="stat-label"><i class="dot amber"></i>部分落地 / 待确认</div>
+            <div class="stat-num">2<span class="unit">项</span></div>
+            <div class="stat-foot">Redis（缺统一缓存层）/ LangChain</div>
+          </div>
+          <div class="card stat">
+            <div class="stat-label"><i class="dot red"></i>未引入（需决策）</div>
+            <div class="stat-num">3<span class="unit">项</span></div>
+            <div class="stat-foot">PgSQL / Dify / Vanna.ai</div>
+          </div>
+          <div class="card stat">
+            <div class="stat-label"><i class="dot violet"></i>超需求额外引入</div>
+            <div class="stat-num">7<span class="unit">项</span></div>
+            <div class="stat-foot">Neo4j / MinIO / MinerU / OpenCV / Celery 等</div>
+          </div>
+        </div>
+
+        <div class="card" style="padding:0;overflow:hidden;margin-bottom:14px">
+          <table>
+            <thead>
+              <tr><th>需求强制组件</th><th>当前代码状态</th><th>偏差等级</th><th>建议</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="cell-name">FastAPI</td>
+                <td>✅ 已用（fastapi ≥ 0.115）</td>
+                <td><span class="tag ok">无</span></td>
+                <td>保持</td>
+              </tr>
+              <tr>
+                <td class="cell-name">ORM（SQLAlchemy）</td>
+                <td>✅ 已用（sqlalchemy ≥ 2.0，dao / infrastructure 分层）</td>
+                <td><span class="tag ok">无</span></td>
+                <td>保持，持续排查裸 SQL</td>
+              </tr>
+              <tr>
+                <td class="cell-name">MySQL</td>
+                <td>✅ 已用（pymysql，业务主数据）</td>
+                <td><span class="tag ok">无</span></td>
+                <td>保持</td>
+              </tr>
+              <tr>
+                <td class="cell-name">Milvus</td>
+                <td>✅ 已用（pymilvus ≥ 3.0，向量检索）</td>
+                <td><span class="tag ok">无</span></td>
+                <td>保持</td>
+              </tr>
+              <tr>
+                <td class="cell-name">LangGraph</td>
+                <td>✅ 已用（langgraph ≥ 0.2，langgraph_engine）</td>
+                <td><span class="tag ok">无</span></td>
+                <td>保持</td>
+              </tr>
+              <tr>
+                <td class="cell-name">Redis</td>
+                <td>⚠️ 经 celery[redis] 用于任务调度；缺统一缓存 / 会话 / 限流层</td>
+                <td><span class="tag warn">中</span></td>
+                <td>显式引入 Redis 作为缓存与会话 / 限流中间件，满足热点命中 ≥98%</td>
+              </tr>
+              <tr>
+                <td class="cell-name">PgSQL</td>
+                <td>❌ 未引入，海量分析 / 时序数据目前落在 MySQL</td>
+                <td><span class="tag danger">高</span></td>
+                <td>决策：是否引入 PgSQL 做分析宽表 / 时序（Vanna 类问数更稳）</td>
+              </tr>
+              <tr>
+                <td class="cell-name">Dify</td>
+                <td>❌ 未引入，以自研 agent_management / publish / workflow / model_provider 替代</td>
+                <td><span class="tag danger">高</span></td>
+                <td>决策：自研中台是否作为长期方案（推荐）；或集成 Dify 做可视化 Prompt / 编排</td>
+              </tr>
+              <tr>
+                <td class="cell-name">Vanna.ai</td>
+                <td>❌ 未引入，data-decision 模块承载 NL2SQL，引擎未确认</td>
+                <td><span class="tag danger">高</span></td>
+                <td>决策：是否基于 Vanna.ai 或自研 NL2SQL；需补"自动出图 / 出报告"能力</td>
+              </tr>
+              <tr>
+                <td class="cell-name">LangChain</td>
+                <td>⚠️ 未直接声明；langgraph 通常随带 langchain-core</td>
+                <td><span class="tag ok">低</span></td>
+                <td>确认依赖树；如需显式 LLM 编排可补 langchain</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-head"><h3>非功能性指标达标评估</h3><span class="tag warn">待压测验证</span></div>
+            <div class="kpi-line"><span class="k">并发在线 ≥2000 人</span><span class="tag warn">架构支持 · 压测缺失</span></div>
+            <div class="kpi-line"><span class="k">页面渲染 ≤1s</span><span class="tag warn">待实测</span></div>
+            <div class="kpi-line"><span class="k">向量检索 ≤500ms</span><span class="tag ok">当前 186ms</span></div>
+            <div class="kpi-line"><span class="k">普通接口 ≤1s</span><span class="tag ok">当前 328ms</span></div>
+            <div class="kpi-line"><span class="k">缓存命中率 ≥98%</span><span class="tag danger">当前 82%</span></div>
+            <div class="kpi-line"><span class="k">全年可用率 ≥99.9%</span><span class="tag warn">待建设高可用部署</span></div>
+            <div class="kpi-line"><span class="k">国产化适配</span><span class="tag danger">未验证</span></div>
+          </div>
+
+          <div class="card">
+            <div class="card-head"><h3>待确认 / 风险清单</h3><span class="tag danger">7 项</span></div>
+            <div class="row" style="padding:9px 0">
+              <span class="tag danger">Q1</span>
+              <div class="grow" style="font-size:12.5px">Dify 是否回填？自研中台功能面已覆盖，是否仍需可视化 Prompt / 编排？</div>
+            </div>
+            <div class="row" style="padding:9px 0">
+              <span class="tag danger">Q2</span>
+              <div class="grow" style="font-size:12.5px">Vanna.ai 是否回填？NL2SQL 引擎归属与"自动出图 / 出报告"深度？</div>
+            </div>
+            <div class="row" style="padding:9px 0">
+              <span class="tag danger">Q3</span>
+              <div class="grow" style="font-size:12.5px">PgSQL 是否引入？海量分析 / 时序数据是否继续留在 MySQL？</div>
+            </div>
+            <div class="row" style="padding:9px 0">
+              <span class="tag warn">Q4</span>
+              <div class="grow" style="font-size:12.5px">Redis 专项缓存层缺失，热点命中率 ≥98% 如何保障？</div>
+            </div>
+            <div class="row" style="padding:9px 0">
+              <span class="tag warn">Q5</span>
+              <div class="grow" style="font-size:12.5px">行 / 字段级权限是否已在所有查询接口落地？</div>
+            </div>
+            <div class="row" style="padding:9px 0">
+              <span class="tag warn">Q6</span>
+              <div class="grow" style="font-size:12.5px">量化指标（解析 / 检索 / 匹配准确率）尚无评测集与基线。</div>
+            </div>
+            <div class="row" style="padding:9px 0;border-bottom:none">
+              <span class="tag warn">Q7</span>
+              <div class="grow" style="font-size:12.5px">国产化适配：当前 MySQL / Milvus 非国产，政企场景是否需替换？</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  /* ---------- 侧边栏页面切换 ---------- */
+  const navItems = document.querySelectorAll('.nav-item');
+  const pages = document.querySelectorAll('.page');
+  const crumbPage = document.getElementById('crumbPage');
+
+  navItems.forEach(item => {
+    item.addEventListener('click', () => {
+      const target = item.dataset.page;
+      navItems.forEach(n => n.classList.remove('active'));
+      item.classList.add('active');
+      pages.forEach(p => p.classList.remove('active'));
+      const page = document.getElementById('page-' + target);
+      if (page) page.classList.add('active');
+      crumbPage.textContent = item.dataset.title || '';
+      document.querySelector('.content').scrollTop = 0;
+    });
+  });
+
+  /* ---------- Tab 切换 ---------- */
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const group = tab.parentElement;
+      group.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+      tab.classList.add('on');
+      const panelId = tab.dataset.tab;
+      const panel = document.getElementById(panelId);
+      if (panel) {
+        const container = panel.parentElement;
+        container.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('on'));
+        panel.classList.add('on');
+      }
+    });
+  });
+
+  /* ---------- Chip 点击态 ---------- */
+  document.querySelectorAll('.chips').forEach(group => {
+    group.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => chip.classList.toggle('on'));
+    });
+  });
+</script>
+</body>
+</html>

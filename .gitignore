@@ -1,0 +1,17 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+
+# Local Python environments
+.venv/
+venv/
+
+# Python build output
+build/
+dist/
+*.egg-info/
+
+# Local configuration and secrets; keep the non-sensitive template.
+.env
+.env.*
+!.env.example

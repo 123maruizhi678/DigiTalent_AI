@@ -1,0 +1,16 @@
+{
+  "sha256": "e62f4490729bc2f985694ddb7cf4c84b3f84db13f86c2e7d2566c60f996d6e93",
+  "pages": [
+    "dashboard",
+    "resume",
+    "talent",
+    "exam",
+    "match",
+    "training",
+    "data",
+    "kb",
+    "agent",
+    "system",
+    "stack"
+  ]
+}
