@@ -15,3 +15,7 @@ dist/
 .env
 .env.*
 !.env.example
+
+# 本地质量工具缓存
+.ruff_cache/
+.pytest_cache/

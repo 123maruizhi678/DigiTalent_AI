@@ -24,37 +24,50 @@ class Settings(BaseSettings):
 
     # 应用基础配置：均非敏感；允许省略，省略时使用默认值。
     APP_NAME: str = Field(
-        default="DigiTalent AI", min_length=1, repr=False,
+        default="DigiTalent AI",
+        min_length=1,
+        repr=False,
         description="应用名称：用于 FastAPI 标题；字符串，去除两端空白后不能为空；默认 DigiTalent AI；非必填、非敏感。",
     )
     APP_ENV: Literal["development", "test", "production"] = Field(
-        default="development", repr=False,
+        default="development",
+        repr=False,
         description="运行环境：字符串，仅允许 development、test、production；默认 development；非必填、非敏感。",
     )
     DEBUG: bool = Field(
-        default=False, repr=False,
+        default=False,
+        repr=False,
         description="调试模式：控制 FastAPI 调试开关；布尔值，支持 true/false、1/0、yes/no、on/off；默认 false；非必填、非敏感。",
     )
     API_V1_PREFIX: str = Field(
-        default="/api/v1", pattern=r"^/[A-Za-z0-9_-]+(?:/[A-Za-z0-9_-]+)*$", repr=False,
+        default="/api/v1",
+        pattern=r"^/[A-Za-z0-9_-]+(?:/[A-Za-z0-9_-]+)*$",
+        repr=False,
         description="API 版本前缀：挂载总路由；字符串，以 / 开头的非空路径段，允许字母数字下划线连字符，不允许尾斜杠；默认 /api/v1；非必填、非敏感。",
     )
     HOST: str = Field(
-        default="127.0.0.1", min_length=1, repr=False,
+        default="127.0.0.1",
+        min_length=1,
+        repr=False,
         description="监听地址：供 python -m app.main 启动使用；非空字符串，应为有效主机名或 IP；默认 127.0.0.1；非必填、非敏感。",
     )
     PORT: int = Field(
-        default=8080, ge=1, le=65535, repr=False,
+        default=8080,
+        ge=1,
+        le=65535,
+        repr=False,
         description="监听端口：供 python -m app.main 启动使用；整数，范围 1～65535；默认 8080；非必填、非敏感。",
     )
 
     # 日志配置：本任务仅校验配置，不初始化 BASE-003 日志设施。
     LOG_LEVEL: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = Field(
-        default="INFO", repr=False,
+        default="INFO",
+        repr=False,
         description="日志级别：字符串，允许 DEBUG、INFO、WARNING、ERROR、CRITICAL，输入大小写不敏感；默认 INFO；非必填、非敏感。",
     )
     LOG_OUTPUT: Literal["console"] = Field(
-        default="console", repr=False,
+        default="console",
+        repr=False,
         description="日志输出方式：字符串，M0 只允许 console，不写日志目录；默认 console；非必填、非敏感。",
     )
 
@@ -84,7 +97,12 @@ def get_settings() -> Settings:
     try:
         return Settings()
     except ValidationError as error:
-        fields = sorted({str(item["loc"][0]) for item in error.errors(include_input=False, include_context=False)})
+        fields = sorted(
+            {
+                str(item["loc"][0])
+                for item in error.errors(include_input=False, include_context=False)
+            }
+        )
         raise ConfigurationError("配置校验失败，请检查配置项：" + ", ".join(fields)) from None
     except SettingsError:
         raise ConfigurationError("配置来源读取失败，请检查环境变量或 .env 文件格式") from None

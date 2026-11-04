@@ -22,7 +22,11 @@ class RequestTracingMiddleware:
         if scope["type"] != "http":
             return await self.app(scope, receive, send)
         values = [v.decode("latin-1") for k, v in scope["headers"] if k.lower() == b"x-request-id"]
-        request_id = values[0] if len(values) == 1 and REQUEST_ID_PATTERN.fullmatch(values[0]) else "req_" + uuid4().hex
+        request_id = (
+            values[0]
+            if len(values) == 1 and REQUEST_ID_PATTERN.fullmatch(values[0])
+            else "req_" + uuid4().hex
+        )
         token = request_id_context.set(request_id)
         scope.setdefault("state", {})["request_id"] = request_id
         start, status, started = perf_counter(), 500, False
@@ -32,7 +36,9 @@ class RequestTracingMiddleware:
             if message["type"] == "http.response.start":
                 status, started = message["status"], True
                 message = dict(message)
-                message["headers"] = [(k, v) for k, v in message.get("headers", []) if k.lower() != b"x-request-id"] + [(b"x-request-id", request_id.encode("ascii"))]
+                message["headers"] = [
+                    (k, v) for k, v in message.get("headers", []) if k.lower() != b"x-request-id"
+                ] + [(b"x-request-id", request_id.encode("ascii"))]
             await send(message)
 
         try:
@@ -49,8 +55,14 @@ class RequestTracingMiddleware:
             try:
                 # 使用路由模板防止路径参数包含个人信息；不输出查询串或未知路径。
                 route = scope.get("route")
-                logger.info("请求处理完成", extra={"method": scope["method"],
-                    "path": getattr(route, "path", "<unmatched>"), "status_code": status,
-                    "duration_ms": round((perf_counter() - start) * 1000, 3)})
+                logger.info(
+                    "请求处理完成",
+                    extra={
+                        "method": scope["method"],
+                        "path": getattr(route, "path", "<unmatched>"),
+                        "status_code": status,
+                        "duration_ms": round((perf_counter() - start) * 1000, 3),
+                    },
+                )
             finally:
                 request_id_context.reset(token)

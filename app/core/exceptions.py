@@ -50,12 +50,18 @@ class SystemError(ApplicationError):
         super().__init__()
 
 
-def error_response(code: str, message: str, status: int, errors: list | None = None,
-                   headers: dict | None = None) -> JSONResponse:
+def error_response(
+    code: str, message: str, status: int, errors: list | None = None, headers: dict | None = None
+) -> JSONResponse:
     request_id = request_id_context.get()
     return JSONResponse(
-        {"code": code, "message": message, "data": {"errors": errors or []},
-         "request_id": request_id}, status_code=status,
+        {
+            "code": code,
+            "message": message,
+            "data": {"errors": errors or []},
+            "request_id": request_id,
+        },
+        status_code=status,
         headers={**(headers or {}), "X-Request-ID": request_id or ""},
     )
 
@@ -66,16 +72,26 @@ async def application_error_handler(request: Request, exc: ApplicationError):
 
 async def http_error_handler(request: Request, exc: HTTPException):
     code = {401: "AUTHENTICATION_ERROR", 403: "PERMISSION_ERROR"}.get(
-        exc.status_code, "SYSTEM_ERROR" if exc.status_code >= 500 else "PARAMETER_ERROR")
+        exc.status_code, "SYSTEM_ERROR" if exc.status_code >= 500 else "PARAMETER_ERROR"
+    )
     # HTTPException.detail 可能是原始数据库错误或用户输入，采用固定安全文案。
-    return error_response(code, "系统处理失败" if exc.status_code >= 500 else "请求无法处理",
-                          exc.status_code, headers=exc.headers)
+    return error_response(
+        code,
+        "系统处理失败" if exc.status_code >= 500 else "请求无法处理",
+        exc.status_code,
+        headers=exc.headers,
+    )
 
 
 async def validation_error_handler(request: Request, exc: RequestValidationError):
     # 不回传 input、ctx、原始 msg 或可能由用户控制的字典键。
-    errors = [{"location": str(item["loc"][0]) if item.get("loc") else "request",
-               "message": "参数类型、格式或取值不符合要求"} for item in exc.errors()]
+    errors = [
+        {
+            "location": str(item["loc"][0]) if item.get("loc") else "request",
+            "message": "参数类型、格式或取值不符合要求",
+        }
+        for item in exc.errors()
+    ]
     return error_response("PARAMETER_ERROR", "请求参数错误", 422, errors)
 
 

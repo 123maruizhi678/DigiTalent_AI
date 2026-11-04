@@ -114,7 +114,10 @@ function command(value: string) {
         </div>
       </header>
       <main :key="route.path" class="content">
-        <div class="demo-banner">当前展示为原型演示数据，尚未连接真实业务数据。统计卡片、表格、图表均为演示数据；AI 输出均为模拟结果。</div>
+        <div class="demo-banner">
+          当前展示为原型演示数据，尚未连接真实业务数据。统计卡片、表格、图表均为演示数据；AI
+          输出均为模拟结果。
+        </div>
         <router-view />
       </main>
     </div>

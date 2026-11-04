@@ -24,9 +24,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 
 settings = get_settings()
-app = FastAPI(
-    title=settings.APP_NAME, debug=settings.DEBUG, version="0.1.0", lifespan=lifespan
-)
+app = FastAPI(title=settings.APP_NAME, debug=settings.DEBUG, version="0.1.0", lifespan=lifespan)
 app.include_router(api_router, prefix=settings.API_V1_PREFIX)
 register_exception_handlers(app)
 app.add_middleware(RequestTracingMiddleware)

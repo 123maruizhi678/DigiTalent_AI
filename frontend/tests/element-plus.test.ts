@@ -44,7 +44,11 @@ describe('prototype compatibility with selected Element Plus components', () => 
       try {
         await flushPromises()
         expect(wrapper.exists()).toBe(true)
-        expect(warnings.mock.calls.filter((args) => /Failed to resolve component|Unhandled error/.test(args.join(' ')))).toEqual([])
+        expect(
+          warnings.mock.calls.filter((args) =>
+            /Failed to resolve component|Unhandled error/.test(args.join(' ')),
+          ),
+        ).toEqual([])
         expect(errors.mock.calls).toEqual([])
       } finally {
         wrapper.unmount()
@@ -78,7 +82,9 @@ describe('prototype compatibility with selected Element Plus components', () => 
     const confirmation = ElMessageBox.confirm('确认兼容性验证', '确认')
     await flushPromises()
     expect(document.querySelector('.el-message-box')?.textContent).toContain('确认兼容性验证')
-    const confirm = document.querySelector<HTMLButtonElement>('.el-message-box__btns .el-button--primary')
+    const confirm = document.querySelector<HTMLButtonElement>(
+      '.el-message-box__btns .el-button--primary',
+    )
     expect(confirm).not.toBeNull()
     confirm!.click()
     await expect(confirmation).resolves.toBe('confirm')

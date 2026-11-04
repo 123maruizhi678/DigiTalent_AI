@@ -1,0 +1,26 @@
+# 工具配置均为非敏感、可省略的开发默认值，不定义应用环境变量。
+[tool.ruff]
+# Python 兼容基线；统一行宽为正整数 100。
+target-version = "py311"
+line-length = 100
+# 强制排除受限目录及生成物，显式传入路径时也不能扫描。
+force-exclude = true
+extend-exclude = ["docs", "logs", "scripts", "data", "frontend", ".venv", "venv", "build", "dist", "__pycache__", ".pytest_cache", ".ruff_cache"]
+
+[tool.ruff.lint]
+# 语法与常见错误、未使用导入、导入排序、常见陷阱及现代 Python 写法。
+select = ["E4", "E7", "E9", "F", "I", "B", "UP"]
+
+[tool.ruff.format]
+# 统一双引号、空格缩进和 LF 换行；长中文说明字符串保留原文。
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"
+
+[tool.pytest.ini_options]
+# 保留单元/API 目录；文件、函数与测试类的命名规则。
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+python_classes = ["Test*"]
+asyncio_default_fixture_loop_scope = "function"

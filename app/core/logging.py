@@ -1,11 +1,11 @@
 """统一控制台 JSON 日志；禁止调用方传入原始业务数据或凭据。"""
 
-from contextvars import ContextVar
-from datetime import datetime, timezone
 import json
 import logging
 import re
 import traceback
+from contextvars import ContextVar
+from datetime import UTC, datetime
 
 from app.core.config import get_settings
 
@@ -14,7 +14,11 @@ request_id_context: ContextVar[str | None] = ContextVar("request_id", default=No
 
 def safe_text(value: str) -> str:
     """防御性遮盖常见凭据、连接串、联系方式；不替代调用方的数据最小化。"""
-    value = re.sub(r"(?i)\b(?:password|passwd|access_token|refresh_token|token|cookie|api[_-]?key|authorization|密码)\b\s*[:=]\s*(?:Bearer\s+)?[^\s,;]+", "[REDACTED]", value)
+    value = re.sub(
+        r"(?i)\b(?:password|passwd|access_token|refresh_token|token|cookie|api[_-]?key|authorization|密码)\b\s*[:=]\s*(?:Bearer\s+)?[^\s,;]+",
+        "[REDACTED]",
+        value,
+    )
     value = re.sub(r"\b[a-zA-Z][a-zA-Z0-9+.-]*://[^\s]+", "[REDACTED_URL]", value)
     value = re.sub(r"[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}|\b\d{11,18}[Xx]?\b", "[REDACTED]", value)
     return value
@@ -25,7 +29,7 @@ class JsonFormatter(logging.Formatter):
 
     def format(self, record: logging.LogRecord) -> str:
         payload = {
-            "time": datetime.fromtimestamp(record.created, timezone.utc).isoformat(),
+            "time": datetime.fromtimestamp(record.created, UTC).isoformat(),
             "level": record.levelname,
             "logger": record.name,
             "message": safe_text(record.getMessage()),
@@ -37,8 +41,11 @@ class JsonFormatter(logging.Formatter):
         if record.exc_info and record.exc_info[2]:
             # 只保留文件名、函数名及行号；不包含绝对路径、源码、异常值和 locals。
             payload["frames"] = [
-                {"file": frame.filename.replace("\\", "/").rsplit("/", 1)[-1],
-                 "function": frame.name, "line": frame.lineno}
+                {
+                    "file": frame.filename.replace("\\", "/").rsplit("/", 1)[-1],
+                    "function": frame.name,
+                    "line": frame.lineno,
+                }
                 for frame in traceback.extract_tb(record.exc_info[2])
             ]
         return json.dumps(payload, ensure_ascii=False)
