@@ -24,7 +24,7 @@ def isolated_settings(monkeypatch):
 
 def test_defaults():
     settings = get_settings()
-    assert settings.model_dump() == {
+    assert {k: v for k, v in settings.model_dump().items() if not k.startswith("MYSQL_")} == {
         "APP_NAME": "DigiTalent AI",
         "APP_ENV": "development",
         "DEBUG": False,
@@ -41,7 +41,7 @@ def test_environment_overrides(monkeypatch):
         "APP_NAME": "环境测试",
         "APP_ENV": "test",
         "DEBUG": "true",
-        "API_V1_PREFIX": "/api/test",
+        "API_V1_PREFIX": "/api/v1",
         "HOST": "0.0.0.0",
         "PORT": "8123",
         "LOG_LEVEL": "warning",
@@ -50,7 +50,7 @@ def test_environment_overrides(monkeypatch):
     settings = get_settings()
     assert (settings.APP_NAME, settings.APP_ENV, settings.DEBUG) == ("环境测试", "test", True)
     assert (settings.API_V1_PREFIX, settings.HOST, settings.PORT, settings.LOG_LEVEL) == (
-        "/api/test",
+        "/api/v1",
         "0.0.0.0",
         8123,
         "WARNING",
@@ -67,7 +67,8 @@ def test_dotenv_priority_and_unknown_secret(tmp_path, monkeypatch):
     assert settings.APP_NAME == "文件配置"
     assert settings.PORT == 8125
     assert "fake-secret" not in repr(settings)
-    assert "MYSQL_PASSWORD" not in settings.model_dump()
+    assert settings.MYSQL_PASSWORD.get_secret_value() == "fake-secret"
+    assert "fake-secret" not in str(settings.model_dump())
 
 
 @pytest.mark.parametrize("value", ["1", "8080", "65535"])
@@ -101,6 +102,10 @@ def test_bool_parsing(monkeypatch, value, expected):
         ("APP_NAME", " "),
         ("API_V1_PREFIX", "api/v1"),
         ("API_V1_PREFIX", "/api/v1/"),
+        ("API_V1_PREFIX", "/api/test"),
+        ("API_V1_PREFIX", "/api"),
+        ("API_V1_PREFIX", "/api/api/v1"),
+        ("API_V1_PREFIX", "/api/v1/api/v1"),
         ("HOST", ""),
         ("LOG_OUTPUT", "file"),
     ],
@@ -162,7 +167,7 @@ def test_fastapi_configured_prefix_preserves_health(monkeypatch):
     from app import main
 
     monkeypatch.setenv("APP_NAME", "配置集成验证")
-    monkeypatch.setenv("API_V1_PREFIX", "/api/test")
+    monkeypatch.setenv("API_V1_PREFIX", "/api/v1")
     monkeypatch.setenv("DEBUG", "true")
     try:
         importlib.reload(main)
@@ -170,11 +175,11 @@ def test_fastapi_configured_prefix_preserves_health(monkeypatch):
         assert main.app.title == "配置集成验证"
         assert main.app.debug is True
         with TestClient(main.app) as client:
-            assert client.get("/api/test/health").json() == {
+            assert client.get("/api/v1/health").json() == {
                 "status": "ok",
                 "service": "digitalent-ai",
             }
-            assert client.get("/api/v1/health").status_code == 404
+            assert client.get("/api/test/health").status_code == 404
     finally:
         for name in ("APP_NAME", "API_V1_PREFIX", "DEBUG"):
             monkeypatch.delenv(name)

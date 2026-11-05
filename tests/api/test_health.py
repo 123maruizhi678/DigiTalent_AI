@@ -22,5 +22,5 @@ def test_health_has_one_versioned_get_operation() -> None:
         assert client.get("/api/api/v1/health").status_code == 404
         assert client.post("/api/v1/health").status_code == 405
 
-    assert list(schema["paths"]) == ["/api/v1/health"]
+    assert set(schema["paths"]) == {"/api/v1/health", "/api/v1/health/db"}
     assert list(schema["paths"]["/api/v1/health"]) == ["get"]

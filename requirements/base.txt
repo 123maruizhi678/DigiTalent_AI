@@ -1,0 +1,21 @@
+# M0 后端运行依赖及传递依赖，保留既有精确版本。
+annotated-doc==0.0.5
+annotated-types==0.8.0
+anyio==4.15.1
+click==8.5.0
+fastapi==0.162.0
+h11==0.16.0
+idna==3.20
+opentelemetry-api==1.45.1
+pydantic==2.14.2
+pydantic_core==2.50.2
+pydantic-settings==2.16.2
+python-dotenv==1.2.4
+starlette==1.10.0
+typing_extensions==4.16.0
+typing-inspection==0.4.4
+uvicorn==0.54.0
+
+# BASE-006：复用 feiyu 已安装的同步数据库依赖，不安装或升级。
+SQLAlchemy==2.1.6
+PyMySQL==1.2.3

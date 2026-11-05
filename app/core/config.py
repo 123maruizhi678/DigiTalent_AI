@@ -4,7 +4,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
-from pydantic import Field, ValidationError, field_validator
+from pydantic import Field, SecretStr, ValidationError, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic_settings.exceptions import SettingsError
 
@@ -39,11 +39,10 @@ class Settings(BaseSettings):
         repr=False,
         description="调试模式：控制 FastAPI 调试开关；布尔值，支持 true/false、1/0、yes/no、on/off；默认 false；非必填、非敏感。",
     )
-    API_V1_PREFIX: str = Field(
+    API_V1_PREFIX: Literal["/api/v1"] = Field(
         default="/api/v1",
-        pattern=r"^/[A-Za-z0-9_-]+(?:/[A-Za-z0-9_-]+)*$",
         repr=False,
-        description="API 版本前缀：挂载总路由；字符串，以 / 开头的非空路径段，允许字母数字下划线连字符，不允许尾斜杠；默认 /api/v1；非必填、非敏感。",
+        description="API_V1_PREFIX API 版本前缀：挂载总路由；字符串，仅允许 /api/v1；默认 /api/v1；非必填、非敏感，所有环境保持一致。",
     )
     HOST: str = Field(
         default="127.0.0.1",
@@ -71,10 +70,77 @@ class Settings(BaseSettings):
         description="日志输出方式：字符串，M0 只允许 console，不写日志目录；默认 console；非必填、非敏感。",
     )
 
+    # MySQL 配置：允许不配置凭据以保留应用存活检查；连接检查时报告未配置。
+    MYSQL_HOST: str = Field(
+        default="127.0.0.1",
+        min_length=1,
+        repr=False,
+        description="MYSQL_HOST 主机地址；非空主机名或 IP；类型 str；默认127.0.0.1；非必填、非敏感。",
+    )
+    MYSQL_PORT: int = Field(
+        default=3306,
+        ge=1,
+        le=65535,
+        repr=False,
+        description="MYSQL_PORT 端口；整数 1～65535；类型 int；默认3306；非必填、非敏感。",
+    )
+    MYSQL_USER: str = Field(
+        default="",
+        repr=False,
+        description="MYSQL_USER 用户名；字符串，空值表示未配置；类型 str；默认空字符串；非必填、非敏感。",
+    )
+    MYSQL_PASSWORD: SecretStr = Field(
+        default=SecretStr(""),
+        repr=False,
+        description="MYSQL_PASSWORD 密码；字符串，可为空，敏感且脱敏；类型 SecretStr；默认空字符串；非必填、敏感。",
+    )
+    MYSQL_DATABASE: str = Field(
+        default="",
+        repr=False,
+        description="MYSQL_DATABASE 数据库名；字符串，空值表示未配置；类型 str；默认空字符串；非必填、非敏感。",
+    )
+    MYSQL_POOL_SIZE: int = Field(
+        default=5,
+        ge=1,
+        le=100,
+        repr=False,
+        description="MYSQL_POOL_SIZE 基础连接数；整数 1～100；类型 int；默认5；非必填、非敏感。",
+    )
+    MYSQL_MAX_OVERFLOW: int = Field(
+        default=10,
+        ge=0,
+        le=100,
+        repr=False,
+        description="MYSQL_MAX_OVERFLOW 额外连接数；整数 0～100；类型 int；默认10；非必填、非敏感。",
+    )
+    MYSQL_POOL_TIMEOUT: int = Field(
+        default=30,
+        ge=1,
+        le=300,
+        repr=False,
+        description="MYSQL_POOL_TIMEOUT 获取连接等待秒数；整数 1～300；类型 int；默认30；非必填、非敏感。",
+    )
+    MYSQL_POOL_RECYCLE: int = Field(
+        default=1800,
+        ge=1,
+        le=86400,
+        repr=False,
+        description="MYSQL_POOL_RECYCLE 连接回收秒数；整数 1～86400；类型 int；默认1800；非必填、非敏感。",
+    )
+    MYSQL_CONNECT_TIMEOUT: int = Field(
+        default=5,
+        ge=1,
+        le=60,
+        repr=False,
+        description="MYSQL_CONNECT_TIMEOUT 建立连接超时秒数；整数 1～60；类型 int；默认5；非必填、非敏感。",
+    )
+
     # 后续扩展分类：MySQL、Milvus、Ollama、MinerU、文件存储、模型服务、任务调度。
     # 首次实现时再定义字段；凭据应使用 SecretStr、repr=False 和中文说明，禁止明文输出。
 
-    @field_validator("APP_NAME", "HOST", mode="before")
+    @field_validator(
+        "APP_NAME", "HOST", "MYSQL_HOST", "MYSQL_USER", "MYSQL_DATABASE", mode="before"
+    )
     @classmethod
     def strip_required_text(cls, value: object) -> object:
         """字符串去除两端空白，非空约束由字段统一校验。"""
